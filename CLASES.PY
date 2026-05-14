@@ -1,9 +1,9 @@
-class usuario:
+class Usuario:
     def __init__(self,nombre,correo,cedula,edad):
         pass
-class estudiante():
+class Estudiante(Usuario):
     pass
-class docente():
+class Docente(Usuario):
     pass
-class administrador():
+class Administrador(Usuario):
     pass
