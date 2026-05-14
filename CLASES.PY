@@ -5,3 +5,5 @@ class estudiante():
     pass
 class docente():
     pass
+class administrador():
+    pass
