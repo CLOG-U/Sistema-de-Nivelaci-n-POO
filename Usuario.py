@@ -43,3 +43,46 @@ class Usuario(ABC):
     @property
     def contraseña(self):
         return self.__contraseña
+    #Setter  
+#Nos permite modificar los atributos privado aplicando validaciones
+    @nombres.setter
+    def nombres(self, valor):
+        if valor == "":             #Valida que el nombre no este vacío
+            print("El nombre no puede estar vacio")
+        else:
+            self.__nombres = valor
+
+    @apellidos.setter
+    def apellidos(self, valor):
+        if valor == "":    #valida que los apellidos no esten vacios.
+            print("Los apellidos no pueden estar vacios")
+        else:
+            self.__apellidos = valor
+
+#método estatico.
+# Valida si el correo contiene '@' y '.' además no utiliza atributos del objeto.
+    @staticmethod
+    def validar_correo(correo):
+     return "@" in correo and "." in correo
+    
+    @correo.setter
+    def correo(self, valor):
+     if not Usuario.validar_correo(valor):
+         print("El correo no es valido")
+     else:
+         self.__correo = valor
+
+    @telefono.setter
+    def telefono(self, valor):
+        if len(valor) < 9: #valida que el telefono tenga los digitos correctos
+            print("El telefono debe tener al menos 9 digitos")
+        else:
+            self.__telefono = valor
+
+    @estado.setter
+    def estado(self, valor):
+        self.__estado = valor
+
+    @contraseña.setter
+    def contraseña(self, valor):
+        self.__contraseña = valor
