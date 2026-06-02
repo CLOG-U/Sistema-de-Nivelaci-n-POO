@@ -41,3 +41,40 @@ class Estudiante(Usuario):
     @matricula.setter
     def matricula(self, mat):
         self.__matricula = mat
+    #solicita un cupo en curso- verifica la disponibilidad del cupo
+    def solicitar_cupo(self, curso):
+        if curso.cupo_actual < curso.cupo_maximo:
+            curso.cupo_actual = curso.cupo_actual + 1
+            self.__estado_nivelacion = "En Curso"
+            print("Cupo asignado en " + curso.nombre + " para " + self.nombres + " " + self.apellidos)
+            return True
+        else:
+            print("No hay cupos disponibles en " + curso.nombre)
+            return False
+#consulta las calificaciones del estudiante
+    def consultar_calificaciones(self, calificacion):
+        return calificacion.obtener_resumen()
+#consulta asistencia 
+    def consultar_asistencia(self, asistencia):
+        return asistencia.obtener_resumen()
+
+    def iniciar_sesion(self, contraseña):
+        if self.contraseña == contraseña and self.estado == True:
+            print("Inicio de sesion como estudiante correctamente para " + self.nombres + " " + self.apellidos)
+            return True
+        else:
+            print("Contraseña incorrecta o usuario inactivo")
+            return False
+
+#metodo sobreescrito para mostrar informacion del estudiante
+    def mostrar_info(self):
+        print("Estudiante: " + self.nombres + " " + self.apellidos)
+        print("Cedula: " + self.cedula)
+        print("Documento: " + self.__tipo_documento + " " + self.__numero_documento)
+        print("Fecha de nacimiento: " + self.__fecha_nacimiento)
+        print("Estado nivelacion: " + self.__estado_nivelacion)
+        if self.__discapacidad:
+            print("Discapacidad: Si")
+        else:
+            print("Discapacidad: No")
+
