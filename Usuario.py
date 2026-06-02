@@ -86,3 +86,34 @@ class Usuario(ABC):
     @contraseña.setter
     def contraseña(self, valor):
         self.__contraseña = valor
+#método de clase.
+# Devuelve la cantidad total de usuarios creados. Trabaja con atributos de clase.
+    @classmethod
+    def total_usuarios(cls):
+     return cls.contador     #Devuelve la cantidad total de usuarios creados
+
+#Método abstracto para iniciar sesión
+    @abstractmethod
+    def iniciar_sesion(self, contraseña):
+        pass
+
+#método para cerrar sesión
+    def cerrar_sesion(self):
+        print("Sesion cerrada para " + self.__nombres + " " + self.__apellidos)
+
+
+# Sobrecarga simulada con Kwargs
+
+    def actualizar_perfil(self, **kwargs): #Permite actualizar únicamente los datos enviados.
+        if "nombres" in kwargs:
+            self.nombres = kwargs["nombres"]
+        if "correo" in kwargs:
+            self.correo = kwargs["correo"]
+        if "telefono" in kwargs:
+            self.telefono = kwargs["telefono"]
+        print("Perfil actualizado con los campos: " + str(list(kwargs.keys())))
+
+#Método abstracto que será sobreescrito en las clases hijas aplicando poliformismo
+    @abstractmethod
+    def mostrar_info(self):
+        pass
