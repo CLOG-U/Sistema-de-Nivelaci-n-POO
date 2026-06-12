@@ -1,4 +1,4 @@
-from usuario import Usuario
+from Usuario import Usuario
 class Administrador(Usuario):
 
     def __init__(self, id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono, id_administrador, cargo):

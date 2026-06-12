@@ -12,7 +12,7 @@ class Usuario(ABC):
         self.__telefono = telefono
         self.__estado = estado
         Usuario.contador += 1     #Incrementa el contador de usuarios creados
-      @property      #Este docorador permite acceder al atributo privado, como si fuera una variable normal, sin llamar un método
+    @property      #Este docorador permite acceder al atributo privado, como si fuera una variable normal, sin llamar un método
     def id_usuario(self):
         return self.__id_usuario
 

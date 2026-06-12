@@ -1,6 +1,5 @@
 # Cambio 1: Fabrica de usuarios para el sistema de nivelación
 # Este archivo es un módulo adicional y no modifica los archivos existentes.
-# Está diseñado para demostrar el cambio propuesto en la imagen:
 # una clase FabricaUsuario que crea instancias de Estudiante, Docente o Administrador.
 
 from Usuario import Usuario
@@ -23,9 +22,6 @@ class FabricaUsuario:
             raise ValueError(f"Tipo de usuario no válido: {tipo_usuario}")
 
 
-# Ejemplo de uso comentado para evitar problemas en el proyecto principal.
-# Este bloque ilustra cómo usar la fábrica sin ejecutar código directamente.
-#
 # fabrica = FabricaUsuario()
 # estudiante = fabrica.crear_usuario(
 #     "Estudiante",
