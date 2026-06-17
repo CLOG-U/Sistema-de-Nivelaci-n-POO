@@ -49,7 +49,7 @@ def main():
     print("")
 
     print("Generando carga academica")
-    carga1 = CargaAcademica(1, 5, 20)
+    carga1 = CargaAcademica(1, estudiante1, "2026-1", 5, 20)
     carga1.generar_carga()
     print("")
 

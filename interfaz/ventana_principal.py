@@ -213,9 +213,19 @@ class VentanaPrincipal(tk.Tk):
         contenido.pack(fill="both", expand=True)
         formulario = ttk.Frame(contenido, style="Panel.TFrame", padding=14)
         formulario.pack(side="left", fill="y", padx=(0, 12))
-        self.campos_carga = self._crear_campos(formulario, ["Total asignaturas", "Total creditos"])
+        self.combo_estudiante_carga = self._crear_combo(formulario, "Estudiante")
+        self.campos_carga = self._crear_campos(formulario, ["Periodo", "Total asignaturas", "Total creditos"])
         ttk.Button(formulario, text="Guardar carga", command=self._registrar_carga).pack(fill="x", pady=(8, 0))
-        self.tabla_cargas = self._crear_tabla(contenido, ("id", "asignaturas", "creditos", "estado"), ("ID", "Asignaturas", "Creditos", "Estado"))
+
+        panel_cargas = ttk.Frame(contenido)
+        panel_cargas.pack(side="left", fill="both", expand=True)
+        self.tabla_cargas = self._crear_tabla(
+            panel_cargas,
+            ("id", "estudiante", "periodo", "asignaturas", "creditos", "estado"),
+            ("ID", "Estudiante", "Periodo", "Asignaturas", "Creditos", "Estado"),
+        )
+        self.tabla_cargas.bind("<Double-1>", self._mostrar_detalle_carga_seleccionada)
+        ttk.Button(panel_cargas, text="Ver detalle", command=self._mostrar_detalle_carga_seleccionada).pack(anchor="e")
 
     def _crear_tab_reportes(self):
         contenido = ttk.Frame(self.tab_reportes)
@@ -346,7 +356,10 @@ class VentanaPrincipal(tk.Tk):
 
     def _registrar_carga(self):
         try:
+            estudiante = self._objeto_seleccionado(self.combo_estudiante_carga, self.sistema.listar_estudiantes())
             self.sistema.registrar_carga_academica(
+                estudiante,
+                self._valor(self.campos_carga["Periodo"]),
                 self._valor(self.campos_carga["Total asignaturas"]),
                 self._valor(self.campos_carga["Total creditos"]),
             )
@@ -468,6 +481,29 @@ class VentanaPrincipal(tk.Tk):
         ]
         self._llenar_detalle(ventana, datos)
 
+    def _mostrar_detalle_carga_seleccionada(self, _event=None):
+        seleccion = self.tabla_cargas.selection()
+        if not seleccion:
+            return
+
+        carga = self.objetos_cargas.get(seleccion[0])
+        if carga is not None:
+            self._mostrar_detalle_carga(carga)
+
+    def _mostrar_detalle_carga(self, carga):
+        ventana = self._crear_ventana_detalle("Detalle de carga academica")
+        estudiante = carga.estudiante.nombres + " " + carga.estudiante.apellidos
+        datos = [
+            ("ID", carga.id_carga),
+            ("Estudiante", estudiante),
+            ("Cedula", carga.estudiante.cedula),
+            ("Periodo", carga.periodo),
+            ("Asignaturas", carga.total_asignaturas),
+            ("Creditos", carga.total_creditos),
+            ("Estado", "Activa" if carga.estado else "Inactiva"),
+        ]
+        self._llenar_detalle(ventana, datos)
+
     def _crear_ventana_detalle(self, titulo):
         ventana = tk.Toplevel(self)
         ventana.title(titulo)
@@ -488,8 +524,22 @@ class VentanaPrincipal(tk.Tk):
 
     def _actualizar_cargas(self):
         self._vaciar_tabla(self.tabla_cargas)
+        self.objetos_cargas = {}
         for carga in self.sistema.cargas_academicas:
-            self.tabla_cargas.insert("", "end", values=(carga.id_carga, carga.total_asignaturas, carga.total_creditos, "Activa" if carga.estado else "Inactiva"))
+            estudiante = carga.estudiante.nombres + " " + carga.estudiante.apellidos
+            item = self.tabla_cargas.insert(
+                "",
+                "end",
+                values=(
+                    carga.id_carga,
+                    estudiante,
+                    carga.periodo,
+                    carga.total_asignaturas,
+                    carga.total_creditos,
+                    "Activa" if carga.estado else "Inactiva",
+                ),
+            )
+            self.objetos_cargas[item] = carga
 
     def _actualizar_reportes(self):
         self._vaciar_tabla(self.tabla_reportes)
@@ -499,6 +549,7 @@ class VentanaPrincipal(tk.Tk):
     def _actualizar_combos(self):
         self._llenar_combo(self.combo_docente, self.sistema.listar_docentes())
         self._llenar_combo(self.combo_estudiante, self.sistema.listar_estudiantes())
+        self._llenar_combo(self.combo_estudiante_carga, self.sistema.listar_estudiantes())
         self._llenar_combo(self.combo_aula, self.sistema.aulas)
         self._llenar_combo(self.combo_curso, self.sistema.cursos)
 

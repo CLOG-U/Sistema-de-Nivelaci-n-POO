@@ -102,8 +102,8 @@ class SistemaNivelacion:
         estudiante.estado_nivelacion = "En Curso"
         return curso
 
-    def registrar_carga_academica(self, total_asignaturas, total_creditos):
-        carga = CargaAcademica(len(self.cargas_academicas) + 1, int(total_asignaturas), int(total_creditos))
+    def registrar_carga_academica(self, estudiante, periodo, total_asignaturas, total_creditos):
+        carga = CargaAcademica(len(self.cargas_academicas) + 1, estudiante, periodo, int(total_asignaturas), int(total_creditos))
         self.cargas_academicas.append(carga)
         return carga
 
@@ -190,5 +190,5 @@ class SistemaNivelacion:
         curso = self.registrar_curso("POO-001", "Programacion Orientada a Objetos", "Nivelacion", "A", 30, docente, horario, aula)
         self.inscribir_estudiante(curso, estudiante1)
         self.inscribir_estudiante(curso, estudiante2)
-        self.registrar_carga_academica(5, 20)
+        self.registrar_carga_academica(estudiante1, "2026-1", 5, 20)
         self.generar_reporte("Asistencia", "2026-06-17", "2026-1", "Reporte general de asistencia", "PDF")
