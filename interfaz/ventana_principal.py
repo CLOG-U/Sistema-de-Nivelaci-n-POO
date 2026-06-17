@@ -152,8 +152,8 @@ class VentanaPrincipal(tk.Tk):
         contenido.pack(fill="both", expand=True)
         formularios = ttk.Frame(contenido)
         formularios.pack(side="left", fill="y", padx=(0, 12))
-        tablas = ttk.Frame(contenido)
-        tablas.pack(side="left", fill="both", expand=True)
+        registros = ttk.LabelFrame(contenido, text="Registros", padding=10)
+        registros.pack(side="left", fill="both", expand=True)
 
         aula_panel = ttk.LabelFrame(formularios, text="Aula", padding=12)
         aula_panel.pack(fill="x", pady=(0, 10))
@@ -174,8 +174,11 @@ class VentanaPrincipal(tk.Tk):
         self.combo_estudiante = self._crear_combo(inscripcion_panel, "Estudiante")
         ttk.Button(inscripcion_panel, text="Inscribir estudiante", command=self._inscribir_estudiante).pack(fill="x", pady=(8, 0))
 
-        self.tabla_aulas = self._crear_tabla(tablas, ("codigo", "nombre", "capacidad", "edificio"), ("Codigo", "Nombre", "Capacidad", "Edificio"))
-        self.tabla_cursos = self._crear_tabla(tablas, ("codigo", "nombre", "docente", "cupo"), ("Codigo", "Nombre", "Docente", "Cupo"))
+        self.tabla_registros_cursos = self._crear_tabla(
+            registros,
+            ("tipo", "codigo", "nombre", "detalle", "estado"),
+            ("Tipo", "Codigo", "Nombre", "Detalle", "Estado"),
+        )
 
     def _crear_tab_carga(self):
         contenido = ttk.Frame(self.tab_carga)
@@ -350,8 +353,7 @@ class VentanaPrincipal(tk.Tk):
     def _actualizar_todo(self):
         self._actualizar_metricas()
         self._actualizar_usuarios()
-        self._actualizar_aulas()
-        self._actualizar_cursos()
+        self._actualizar_registros_cursos()
         self._actualizar_cargas()
         self._actualizar_reportes()
         self._actualizar_combos()
@@ -367,17 +369,17 @@ class VentanaPrincipal(tk.Tk):
             detalle = self._detalle_usuario(usuario)
             self.tabla_usuarios.insert("", "end", values=(tipo, usuario.cedula, usuario.nombres + " " + usuario.apellidos, usuario.correo, detalle))
 
-    def _actualizar_aulas(self):
-        self._vaciar_tabla(self.tabla_aulas)
+    def _actualizar_registros_cursos(self):
+        self._vaciar_tabla(self.tabla_registros_cursos)
         for aula in self.sistema.aulas:
-            self.tabla_aulas.insert("", "end", values=(self._texto_objeto(aula), aula.nombre, aula.capacidad, aula.edificio))
+            detalle = "Capacidad " + str(aula.capacidad) + " - " + aula.edificio
+            self.tabla_registros_cursos.insert("", "end", values=("Aula", aula.codigo, aula.nombre, detalle, "Disponible"))
 
-    def _actualizar_cursos(self):
-        self._vaciar_tabla(self.tabla_cursos)
         for curso in self.sistema.cursos:
             docente = curso.docente.nombres + " " + curso.docente.apellidos
             cupo = str(curso.cupo_actual) + "/" + str(curso.cupo_maximo)
-            self.tabla_cursos.insert("", "end", values=(curso.codigo, curso.nombre, docente, cupo))
+            detalle = "Docente: " + docente
+            self.tabla_registros_cursos.insert("", "end", values=("Curso", curso.codigo, curso.nombre, detalle, cupo))
 
     def _actualizar_cargas(self):
         self._vaciar_tabla(self.tabla_cargas)
