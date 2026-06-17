@@ -48,7 +48,6 @@ class SistemaNivelacion:
                 contrasena,
                 telefono,
                 datos.get("tipo_documento", "Cedula"),
-                datos.get("numero_documento", cedula),
                 datos.get("fecha_nacimiento", ""),
                 datos.get("discapacidad", False),
             )
@@ -162,7 +161,6 @@ class SistemaNivelacion:
             "est123",
             "0997654321",
             tipo_documento="Cedula",
-            numero_documento="1300002222",
             fecha_nacimiento="2005-03-15",
         )
         estudiante2 = self.registrar_usuario(
@@ -174,7 +172,6 @@ class SistemaNivelacion:
             "est456",
             "0994567890",
             tipo_documento="Cedula",
-            numero_documento="1300003333",
             fecha_nacimiento="2004-07-22",
         )
         self.registrar_usuario(
@@ -195,4 +192,3 @@ class SistemaNivelacion:
         self.inscribir_estudiante(curso, estudiante2)
         self.registrar_carga_academica(5, 20)
         self.generar_reporte("Asistencia", "2026-06-17", "2026-1", "Reporte general de asistencia", "PDF")
-

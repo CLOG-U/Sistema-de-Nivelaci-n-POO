@@ -1,10 +1,9 @@
 from modelos.usuario import Usuario
 class Estudiante(Usuario):
 
-    def __init__(self, id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono, tipo_documento, numero_documento, fecha_nacimiento, discapacidad=False):
+    def __init__(self, id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono, tipo_documento, fecha_nacimiento, discapacidad=False):
         super().__init__(id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono)
         self.__tipo_documento = tipo_documento
-        self.__numero_documento = numero_documento
         self.__fecha_nacimiento = fecha_nacimiento
         self.__discapacidad = discapacidad
         self.__estado_nivelacion = "Pendiente"
@@ -13,10 +12,6 @@ class Estudiante(Usuario):
     @property
     def tipo_documento(self):
         return self.__tipo_documento
-
-    @property
-    def numero_documento(self):
-        return self.__numero_documento
 
     @property
     def fecha_nacimiento(self):
@@ -70,7 +65,7 @@ class Estudiante(Usuario):
     def mostrar_info(self):
         print("Estudiante: " + self.nombres + " " + self.apellidos)
         print("Cedula: " + self.cedula)
-        print("Documento: " + self.__tipo_documento + " " + self.__numero_documento)
+        print("Documento: " + self.__tipo_documento + " " + self.cedula)
         print("Fecha de nacimiento: " + self.__fecha_nacimiento)
         print("Estado nivelacion: " + self.__estado_nivelacion)
         if self.__discapacidad:

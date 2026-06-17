@@ -99,6 +99,17 @@ class VentanaPrincipal(tk.Tk):
         tipo.grid(row=1, column=0, sticky="ew", pady=(2, 8))
         tipo.bind("<<ComboboxSelected>>", lambda _event: self._actualizar_campos_usuario())
 
+        self.tipo_documento = tk.StringVar(value="Cedula")
+        ttk.Label(formulario, text="Tipo documento", style="Panel.TLabel").grid(row=2, column=0, sticky="w")
+        combo_documento = ttk.Combobox(
+            formulario,
+            textvariable=self.tipo_documento,
+            values=["Cedula", "Pasaporte"],
+            state="readonly",
+            width=26,
+        )
+        combo_documento.grid(row=3, column=0, sticky="ew", pady=(2, 8))
+
         self.campos_usuario = {}
         etiquetas = ["Cedula", "Nombres", "Apellidos", "Correo", "Contrasena", "Telefono"]
         for fila, etiqueta in enumerate(etiquetas, start=2):
@@ -126,7 +137,7 @@ class VentanaPrincipal(tk.Tk):
         elif tipo == "Administrador":
             campos = ["Cargo"]
         else:
-            campos = ["Tipo documento", "Numero documento", "Fecha nacimiento"]
+            campos = ["Fecha nacimiento"]
 
         for indice, etiqueta in enumerate(campos):
             ttk.Label(self.extra_usuario, text=etiqueta, style="Panel.TLabel").grid(row=indice * 2, column=0, sticky="w")
@@ -238,8 +249,7 @@ class VentanaPrincipal(tk.Tk):
             elif tipo == "Administrador":
                 extras["cargo"] = self._valor(self.campos_extra_usuario["Cargo"])
             else:
-                extras["tipo_documento"] = self._valor(self.campos_extra_usuario["Tipo documento"])
-                extras["numero_documento"] = self._valor(self.campos_extra_usuario["Numero documento"])
+                extras["tipo_documento"] = self.tipo_documento.get()
                 extras["fecha_nacimiento"] = self._valor(self.campos_extra_usuario["Fecha nacimiento"])
 
             self.sistema.registrar_usuario(tipo, **datos, **extras)
@@ -433,4 +443,3 @@ class VentanaPrincipal(tk.Tk):
 def iniciar_interfaz():
     app = VentanaPrincipal()
     app.mainloop()
-

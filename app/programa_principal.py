@@ -21,8 +21,8 @@ def main():
 
     fabrica = FabricaUsuario()
     docente1 = fabrica.crear_usuario("Docente", 1, "1300001111", "Valentin", "Perez", "perez123@uleam.edu.ec", "doc123", "0991234567", "Magister en Software", "Programacion OO")
-    estudiante1 = fabrica.crear_usuario("Estudiante", 2, "1300002222", "Maykel", "Castro", "mcastro@uleam.edu.ec", "est123", "0997654321", "Cedula", "1300002222", "2005-03-15")
-    estudiante2 = fabrica.crear_usuario("Estudiante", 3, "1300003333", "Bryan", "Chiquito", "bchiquito@uleam.edu.ec", "est456", "0994567890", "Cedula", "1300003333", "2004-07-22")
+    estudiante1 = fabrica.crear_usuario("Estudiante", 2, "1300002222", "Maykel", "Castro", "mcastro@uleam.edu.ec", "est123", "0997654321", "Cedula", "2005-03-15")
+    estudiante2 = fabrica.crear_usuario("Estudiante", 3, "1300003333", "Bryan", "Chiquito", "bchiquito@uleam.edu.ec", "est456", "0994567890", "Cedula", "2004-07-22")
     admin1 = fabrica.crear_usuario("Administrador", 4, "1300004444", "Carlos", "Ortiz", "cortiz@uleam.edu.ec", "adm123", "0993456789", 1, "Director de Nivelacion")
 
     print("Polimorfismo - el metodo mostrar_info se comporta diferente en cada clase")
