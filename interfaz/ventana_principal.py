@@ -235,7 +235,9 @@ class VentanaPrincipal(tk.Tk):
         contenido.pack(fill="both", expand=True)
         formulario = ttk.Frame(contenido, style="Panel.TFrame", padding=14)
         formulario.pack(side="left", fill="y", padx=(0, 12))
-        self.campos_reporte = self._crear_campos(formulario, ["Tipo reporte", "Fecha generacion", "Periodo", "Descripcion"])
+        ttk.Label(formulario, text="Fecha generacion", style="Panel.TLabel").pack(anchor="w")
+        ttk.Label(formulario, text="Se toma automaticamente del dia actual", style="Panel.TLabel").pack(anchor="w", pady=(2, 12))
+        self.campos_reporte = self._crear_campos(formulario, ["Tipo reporte", "Periodo", "Descripcion"])
         self.formato_reporte = tk.StringVar(value="PDF")
         ttk.Label(formulario, text="Formato", style="Panel.TLabel").pack(anchor="w")
         ttk.Combobox(formulario, textvariable=self.formato_reporte, values=["PDF", "Excel"], state="readonly").pack(fill="x", pady=(2, 8))
@@ -243,7 +245,7 @@ class VentanaPrincipal(tk.Tk):
 
         panel_salida = ttk.Frame(contenido)
         panel_salida.pack(side="left", fill="both", expand=True)
-        self.tabla_reportes = self._crear_tabla(panel_salida, ("id", "tipo", "periodo", "formato"), ("ID", "Tipo", "Periodo", "Formato"))
+        self.tabla_reportes = self._crear_tabla(panel_salida, ("id", "tipo", "fecha", "periodo", "formato"), ("ID", "Tipo", "Fecha", "Periodo", "Formato"))
         self.salida_reporte = tk.Text(panel_salida, height=8, wrap="word", font=("Segoe UI", 10))
         self.salida_reporte.pack(fill="x", pady=(10, 0))
 
@@ -369,13 +371,13 @@ class VentanaPrincipal(tk.Tk):
         try:
             reporte = self.sistema.generar_reporte(
                 self._valor(self.campos_reporte["Tipo reporte"]),
-                self._valor(self.campos_reporte["Fecha generacion"]),
                 self._valor(self.campos_reporte["Periodo"]),
                 self._valor(self.campos_reporte["Descripcion"]),
                 self.formato_reporte.get(),
             )
             self.salida_reporte.delete("1.0", "end")
             self.salida_reporte.insert("end", "Reporte: " + reporte.tipo_reporte + "\n")
+            self.salida_reporte.insert("end", "Fecha de generacion: " + reporte.fecha_generacion + "\n")
             self.salida_reporte.insert("end", "Periodo: " + reporte.periodo + "\n")
             self.salida_reporte.insert("end", "Descripcion: " + reporte.descripcion + "\n")
             self.salida_reporte.insert("end", "Formato: " + self.formato_reporte.get())
@@ -609,7 +611,7 @@ class VentanaPrincipal(tk.Tk):
     def _actualizar_reportes(self):
         self._vaciar_tabla(self.tabla_reportes)
         for reporte in self.sistema.reportes:
-            self.tabla_reportes.insert("", "end", values=(reporte.id_reporte, reporte.tipo_reporte, reporte.periodo, "Generado"))
+            self.tabla_reportes.insert("", "end", values=(reporte.id_reporte, reporte.tipo_reporte, reporte.fecha_generacion, reporte.periodo, "Generado"))
 
     def _actualizar_combos(self):
         self._llenar_combo(self.combo_docente, self.sistema.listar_docentes())

@@ -1,4 +1,5 @@
 import sys
+from datetime import date
 from pathlib import Path
 
 RAIZ_PROYECTO = Path(__file__).resolve().parents[1]
@@ -63,7 +64,7 @@ def main():
     print("")
 
     print("Generando reporte")
-    reporte1 = Reporte(1, "Asistencia", "2026-06-16", "2026-1", "Reporte general de asistencia", reporte_pdf)
+    reporte1 = Reporte(1, "Asistencia", date.today().isoformat(), "2026-1", "Reporte general de asistencia", reporte_pdf)
     reporte1.generar_reporte()
     reporte1.exportar()
 

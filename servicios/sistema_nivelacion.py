@@ -1,3 +1,5 @@
+from datetime import date
+
 from modelos.aula import Aula
 from modelos.carga_academica import CargaAcademica
 from modelos.curso_nivelacion import CursoNivelacion
@@ -122,8 +124,9 @@ class SistemaNivelacion:
     def obtener_cursos_estudiante(self, estudiante):
         return [curso for curso in self.cursos if estudiante in curso.lista_estudiantes]
 
-    def generar_reporte(self, tipo_reporte, fecha_generacion, periodo, descripcion, formato):
+    def generar_reporte(self, tipo_reporte, periodo, descripcion, formato):
         exportador = ExportarExcel() if formato == "Excel" else ExportarPDF()
+        fecha_generacion = date.today().isoformat()
         reporte = Reporte(
             len(self.reportes) + 1,
             tipo_reporte,
@@ -206,4 +209,4 @@ class SistemaNivelacion:
         self.inscribir_estudiante(curso, estudiante1)
         self.inscribir_estudiante(curso, estudiante2)
         self.registrar_carga_academica(estudiante1)
-        self.generar_reporte("Asistencia", "2026-06-17", "2026-1", "Reporte general de asistencia", "PDF")
+        self.generar_reporte("Asistencia", "2026-1", "Reporte general de asistencia", "PDF")

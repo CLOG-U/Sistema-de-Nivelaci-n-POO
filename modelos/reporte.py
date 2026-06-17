@@ -23,6 +23,10 @@ class Reporte(IExportable):
         return self.__periodo
 
     @property
+    def fecha_generacion(self):
+        return self.__fecha_generacion
+
+    @property
     def descripcion(self):
         return self.__descripcion
 
