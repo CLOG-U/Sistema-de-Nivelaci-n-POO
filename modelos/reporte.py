@@ -41,7 +41,7 @@ class Reporte(IExportable):
         print("Descripcion: " + self.__descripcion)
         print("Periodo: " + self.__periodo)
         print("Fecha de generacion: " + self.__fecha_generacion)
-
+#creamos el metodo exportar que implementa la interfaz IExportable, usando inyeccion de dependencias
     def exportar(self, datos=None):
         datos = {"tipo": self.__tipo_reporte, "periodo": self.__periodo}
         self.__exportador.exportar(datos) 
