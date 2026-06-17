@@ -27,6 +27,7 @@ class SistemaNivelacion:
         self.reportes = []
 
     def registrar_usuario(self, tipo_usuario, cedula, nombres, apellidos, correo, contrasena, telefono, **datos):
+        # Se genera un ID único basado en la cantidad de usuarios registrados actualmente
         id_usuario = len(self.usuarios) + 1
 
         if tipo_usuario == "Docente":
@@ -117,6 +118,7 @@ class SistemaNivelacion:
             if carga.estudiante == estudiante and carga.periodo == self.periodo_actual:
                 raise ValueError("El estudiante ya tiene una carga academica registrada en el periodo actual")
 
+        # Se calcula el total de créditos multiplicando la cantidad de asignaturas por los créditos fijos por curso
         total_creditos = total_asignaturas * self.CREDITOS_POR_CURSO
         carga = CargaAcademica(len(self.cargas_academicas) + 1, estudiante, self.periodo_actual, total_asignaturas, total_creditos)
         self.cargas_academicas.append(carga)
