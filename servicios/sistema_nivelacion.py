@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date   #Este módulo administra los procesos académicos del sistema:
 
 from modelos.aula import Aula
 from modelos.carga_academica import CargaAcademica
@@ -11,6 +11,8 @@ from modelos.docente import Docente
 from modelos.estudiante import Estudiante
 from servicios.fabrica import FabricaUsuario
 
+#La clase SistemaNivelacion actúa como el núcleo del sistema,
+#centralizando toda la información y operaciones del sistema.
 
 class SistemaNivelacion:
     CREDITOS_POR_CURSO = 4
