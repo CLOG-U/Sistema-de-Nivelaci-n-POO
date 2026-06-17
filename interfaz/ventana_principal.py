@@ -128,6 +128,8 @@ class VentanaPrincipal(tk.Tk):
 
         columnas = ("tipo", "cedula", "nombres", "correo", "detalle")
         self.tabla_usuarios = self._crear_tabla(tabla_panel, columnas, ("Tipo", "Cedula", "Nombres", "Correo", "Detalle"))
+        self.tabla_usuarios.bind("<Double-1>", self._mostrar_detalle_usuario_seleccionado)
+        ttk.Button(tabla_panel, text="Ver detalle", command=self._mostrar_detalle_usuario_seleccionado).pack(anchor="e")
         self._actualizar_campos_usuario()
 
     def _actualizar_campos_usuario(self):
@@ -400,10 +402,12 @@ class VentanaPrincipal(tk.Tk):
 
     def _actualizar_usuarios(self):
         self._vaciar_tabla(self.tabla_usuarios)
+        self.objetos_usuarios = {}
         for usuario in self.sistema.usuarios:
             tipo = usuario.__class__.__name__
             detalle = self._detalle_usuario(usuario)
-            self.tabla_usuarios.insert("", "end", values=(tipo, usuario.cedula, usuario.nombres + " " + usuario.apellidos, usuario.correo, detalle))
+            item = self.tabla_usuarios.insert("", "end", values=(tipo, usuario.cedula, usuario.nombres + " " + usuario.apellidos, usuario.correo, detalle))
+            self.objetos_usuarios[item] = usuario
 
     def _actualizar_registros_cursos(self):
         self._vaciar_tabla(self.tabla_aulas)
@@ -420,6 +424,72 @@ class VentanaPrincipal(tk.Tk):
             cupo = str(curso.cupo_actual) + "/" + str(curso.cupo_maximo)
             item = self.tabla_cursos.insert("", "end", values=(curso.codigo, curso.nombre, docente, cupo))
             self.objetos_cursos[item] = curso
+
+    def _mostrar_detalle_usuario_seleccionado(self, _event=None):
+        seleccion = self.tabla_usuarios.selection()
+        if not seleccion:
+            return
+
+        usuario = self.objetos_usuarios.get(seleccion[0])
+        if usuario is not None:
+            self._mostrar_detalle_usuario(usuario)
+
+    def _mostrar_detalle_usuario(self, usuario):
+        if isinstance(usuario, Estudiante):
+            self._mostrar_detalle_estudiante(usuario)
+        elif isinstance(usuario, Docente):
+            self._mostrar_detalle_docente(usuario)
+        elif isinstance(usuario, Administrador):
+            self._mostrar_detalle_administrador(usuario)
+
+    def _mostrar_detalle_estudiante(self, estudiante):
+        ventana = self._crear_ventana_detalle("Detalle del estudiante")
+        cursos = self.sistema.obtener_cursos_estudiante(estudiante)
+        materias = ", ".join([curso.nombre for curso in cursos])
+        if not materias:
+            materias = "Sin cursos inscritos"
+
+        datos = [
+            ("ID", estudiante.id_usuario),
+            ("Nombres", estudiante.nombres + " " + estudiante.apellidos),
+            ("Cedula", estudiante.cedula),
+            ("Tipo documento", estudiante.tipo_documento),
+            ("Correo", estudiante.correo),
+            ("Telefono", estudiante.telefono),
+            ("Nacimiento", estudiante.fecha_nacimiento),
+            ("Estado nivelacion", estudiante.estado_nivelacion),
+            ("Materias inscritas", materias),
+        ]
+        self._llenar_detalle(ventana, datos)
+
+    def _mostrar_detalle_docente(self, docente):
+        ventana = self._crear_ventana_detalle("Detalle del docente")
+        cursos = [curso.nombre for curso in self.sistema.cursos if curso.docente == docente]
+        materias = ", ".join(cursos) if cursos else "Sin cursos asignados"
+        datos = [
+            ("ID", docente.id_usuario),
+            ("Nombres", docente.nombres + " " + docente.apellidos),
+            ("Cedula", docente.cedula),
+            ("Correo", docente.correo),
+            ("Telefono", docente.telefono),
+            ("Titulo", docente.titulo_profesional),
+            ("Especialidad", docente.especialidad),
+            ("Cursos asignados", materias),
+        ]
+        self._llenar_detalle(ventana, datos)
+
+    def _mostrar_detalle_administrador(self, admin):
+        ventana = self._crear_ventana_detalle("Detalle del administrador")
+        datos = [
+            ("ID", admin.id_usuario),
+            ("Nombres", admin.nombres + " " + admin.apellidos),
+            ("Cedula", admin.cedula),
+            ("Correo", admin.correo),
+            ("Telefono", admin.telefono),
+            ("Cargo", admin.cargo),
+            ("Estado", "Activo" if admin.estado else "Inactivo"),
+        ]
+        self._llenar_detalle(ventana, datos)
 
     def _mostrar_detalle_curso_seleccionado(self, _event=None):
         seleccion = self.tabla_cursos.selection()
