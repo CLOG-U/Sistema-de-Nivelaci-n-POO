@@ -119,18 +119,21 @@ class VentanaPrincipal(tk.Tk):
         self.tab_usuarios = ttk.Frame(self.tabs, padding=14)
         self.tab_procesos = ttk.Frame(self.tabs, padding=14)
         self.tab_reportes = ttk.Frame(self.tabs, padding=14)
+        self.tab_configurar_parametros = ttk.Frame(self.tabs, padding=14)
         self.tab_cursos = ttk.Frame(self.tabs, padding=14)
 
         self.tabs.add(self.tab_inicio, text="Inicio")
         self.tabs.add(self.tab_usuarios, text="Usuarios")
         self.tabs.add(self.tab_procesos, text="Procesos")
         self.tabs.add(self.tab_reportes, text="Reportes")
+        self.tabs.add(self.tab_configurar_parametros, text="Configurar parámetros")
         self.tabs.add(self.tab_cursos, text="Cursos")
 
         self._crear_tab_inicio()
         self._crear_tab_usuarios()
         self._crear_tab_procesos()
         self._crear_tab_reportes()
+        self._crear_tab_configurar_parametros()
         self._crear_tab_cursos()
 
     def _crear_tab_inicio(self):
@@ -189,6 +192,23 @@ class VentanaPrincipal(tk.Tk):
         self.salida_reporte_text = tk.StringVar(value="Presione el botón para generar el reporte del administrador.")
         ttk.Label(reporte_panel, textvariable=self.salida_reporte_text, style="Panel.TLabel", wraplength=780).pack(fill="x", pady=(12, 0))
 
+    def _crear_tab_configurar_parametros(self):
+        parametro_panel = ttk.LabelFrame(self.tab_configurar_parametros, text="Configurar parámetros", padding=12, style="Panel.TFrame")
+        parametro_panel.pack(fill="x", pady=18)
+
+        ttk.Label(parametro_panel, text="Clave", style="Panel.TLabel").pack(anchor="w")
+        self.entrada_param_clave = ttk.Entry(parametro_panel, width=40)
+        self.entrada_param_clave.pack(fill="x", pady=(2, 8))
+
+        ttk.Label(parametro_panel, text="Valor", style="Panel.TLabel").pack(anchor="w")
+        self.entrada_param_valor = ttk.Entry(parametro_panel, width=40)
+        self.entrada_param_valor.pack(fill="x", pady=(2, 8))
+
+        ttk.Button(parametro_panel, text="Configurar parámetro", command=self._accion_configurar_parametros).pack(fill="x", pady=(8, 0))
+
+        self.salida_param_text = tk.StringVar(value="Ingrese clave y valor, luego presione configurar.")
+        ttk.Label(parametro_panel, textvariable=self.salida_param_text, style="Panel.TLabel", wraplength=780).pack(fill="x", pady=(12, 0))
+
     def _crear_tab_cursos(self):
         curso_panel = ttk.LabelFrame(self.tab_cursos, text="Gestión de cursos", padding=12, style="Panel.TFrame")
         curso_panel.pack(fill="x", pady=18)
@@ -241,6 +261,19 @@ class VentanaPrincipal(tk.Tk):
             self.entrada_proceso.delete(0, "end")
         except Exception as error:
             messagebox.showerror("Gestionar proceso", str(error))
+
+    def _accion_configurar_parametros(self):
+        try:
+            clave = self.entrada_param_clave.get().strip()
+            valor = self.entrada_param_valor.get().strip()
+            if not clave or not valor:
+                raise ValueError("Complete clave y valor")
+            resultado = self.admin.configurar_parametros((clave, valor))
+            self.salida_param_text.set(resultado)
+            self.entrada_param_clave.delete(0, "end")
+            self.entrada_param_valor.delete(0, "end")
+        except Exception as error:
+            messagebox.showerror("Configurar parámetros", str(error))
 
     def _accion_gestionar_curso(self, accion):
         try:
@@ -304,5 +337,8 @@ def iniciar_interfaz():
         app.sistema.cursos = login.sistema.cursos
         app.sistema.reportes = login.sistema.reportes
         app._actualizar_todo()
+        app.mainloop()
+
+
         app.mainloop()
 
