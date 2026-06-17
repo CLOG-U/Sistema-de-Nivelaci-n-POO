@@ -254,6 +254,8 @@ class VentanaPrincipal(tk.Tk):
         self.salida_reporte.pack(fill="x", pady=(10, 0))
         self._renderizar_reporte(None)
 
+    # Método auxiliar que crea dinámicamente campos de entrada (Entry) con etiquetas en un formulario
+    # Recorre cada etiqueta, crea una Label y su correspondiente Entry, almacenando referencias en un diccionario
     def _crear_campos(self, padre, etiquetas):
         campos = {}
         for etiqueta in etiquetas:
@@ -653,6 +655,8 @@ class VentanaPrincipal(tk.Tk):
             self.reporte_activo_id = None
             self._renderizar_reporte(None)
 
+    # Método que llena los ComboBox con objetos del sistema o valores de texto
+    # Almacena los objetos en el combo para poder recuperarlos después al seleccionar una opción
     def _actualizar_combos(self):
         self._llenar_combo(self.combo_docente, self.sistema.listar_docentes())
         self._llenar_combo(self.combo_estudiante, self.sistema.listar_estudiantes())
