@@ -185,13 +185,28 @@ class VentanaPrincipal(tk.Tk):
         self.combo_estudiante = self._crear_combo(inscripcion_panel, "Estudiante")
         ttk.Button(inscripcion_panel, text="Inscribir estudiante", command=self._inscribir_estudiante).pack(fill="x", pady=(8, 0))
 
-        self.tabla_registros_cursos = self._crear_tabla(
-            registros,
-            ("tipo", "codigo", "nombre", "detalle", "estado"),
-            ("Tipo", "Codigo", "Nombre", "Detalle", "Estado"),
+        registros_tabs = ttk.Notebook(registros)
+        registros_tabs.pack(fill="both", expand=True)
+        panel_aulas = ttk.Frame(registros_tabs, padding=8)
+        panel_cursos = ttk.Frame(registros_tabs, padding=8)
+        registros_tabs.add(panel_aulas, text="Aulas")
+        registros_tabs.add(panel_cursos, text="Cursos")
+
+        self.tabla_aulas = self._crear_tabla(
+            panel_aulas,
+            ("codigo", "nombre", "capacidad", "edificio"),
+            ("Codigo", "Nombre", "Capacidad", "Edificio"),
         )
-        self.tabla_registros_cursos.bind("<Double-1>", self._mostrar_detalle_registro)
-        ttk.Button(registros, text="Ver detalle", command=self._mostrar_detalle_registro).pack(anchor="e")
+        self.tabla_aulas.bind("<Double-1>", self._mostrar_detalle_aula_seleccionada)
+        ttk.Button(panel_aulas, text="Ver detalle", command=self._mostrar_detalle_aula_seleccionada).pack(anchor="e")
+
+        self.tabla_cursos = self._crear_tabla(
+            panel_cursos,
+            ("codigo", "nombre", "docente", "cupo"),
+            ("Codigo", "Nombre", "Docente", "Cupo"),
+        )
+        self.tabla_cursos.bind("<Double-1>", self._mostrar_detalle_curso_seleccionado)
+        ttk.Button(panel_cursos, text="Ver detalle", command=self._mostrar_detalle_curso_seleccionado).pack(anchor="e")
 
     def _crear_tab_carga(self):
         contenido = ttk.Frame(self.tab_carga)
@@ -383,30 +398,38 @@ class VentanaPrincipal(tk.Tk):
             self.tabla_usuarios.insert("", "end", values=(tipo, usuario.cedula, usuario.nombres + " " + usuario.apellidos, usuario.correo, detalle))
 
     def _actualizar_registros_cursos(self):
-        self._vaciar_tabla(self.tabla_registros_cursos)
-        self.objetos_registros_cursos = {}
+        self._vaciar_tabla(self.tabla_aulas)
+        self._vaciar_tabla(self.tabla_cursos)
+        self.objetos_aulas = {}
+        self.objetos_cursos = {}
+
         for aula in self.sistema.aulas:
-            detalle = "Capacidad " + str(aula.capacidad) + " - " + aula.edificio
-            item = self.tabla_registros_cursos.insert("", "end", values=("Aula", aula.codigo, aula.nombre, detalle, "Disponible"))
-            self.objetos_registros_cursos[item] = aula
+            item = self.tabla_aulas.insert("", "end", values=(aula.codigo, aula.nombre, aula.capacidad, aula.edificio))
+            self.objetos_aulas[item] = aula
 
         for curso in self.sistema.cursos:
             docente = curso.docente.nombres + " " + curso.docente.apellidos
             cupo = str(curso.cupo_actual) + "/" + str(curso.cupo_maximo)
-            detalle = "Docente: " + docente
-            item = self.tabla_registros_cursos.insert("", "end", values=("Curso", curso.codigo, curso.nombre, detalle, cupo))
-            self.objetos_registros_cursos[item] = curso
+            item = self.tabla_cursos.insert("", "end", values=(curso.codigo, curso.nombre, docente, cupo))
+            self.objetos_cursos[item] = curso
 
-    def _mostrar_detalle_registro(self, _event=None):
-        seleccion = self.tabla_registros_cursos.selection()
+    def _mostrar_detalle_curso_seleccionado(self, _event=None):
+        seleccion = self.tabla_cursos.selection()
         if not seleccion:
             return
 
-        objeto = self.objetos_registros_cursos.get(seleccion[0])
-        if isinstance(objeto, CursoNivelacion):
-            self._mostrar_detalle_curso(objeto)
-        elif isinstance(objeto, Aula):
-            self._mostrar_detalle_aula(objeto)
+        curso = self.objetos_cursos.get(seleccion[0])
+        if curso is not None:
+            self._mostrar_detalle_curso(curso)
+
+    def _mostrar_detalle_aula_seleccionada(self, _event=None):
+        seleccion = self.tabla_aulas.selection()
+        if not seleccion:
+            return
+
+        aula = self.objetos_aulas.get(seleccion[0])
+        if aula is not None:
+            self._mostrar_detalle_aula(aula)
 
     def _mostrar_detalle_curso(self, curso):
         ventana = self._crear_ventana_detalle("Detalle del curso")
