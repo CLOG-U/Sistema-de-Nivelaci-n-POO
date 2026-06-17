@@ -36,16 +36,7 @@ class Estudiante(Usuario):
     @matricula.setter
     def matricula(self, mat):
         self.__matricula = mat
-    #solicita un cupo en curso- verifica la disponibilidad del cupo
-    def solicitar_cupo(self, curso):
-        if curso.cupo_actual < curso.cupo_maximo:
-            curso.cupo_actual = curso.cupo_actual + 1
-            self.__estado_nivelacion = "En Curso"
-            print("Cupo asignado en " + curso.nombre + " para " + self.nombres + " " + self.apellidos)
-            return True
-        else:
-            print("No hay cupos disponibles en " + curso.nombre)
-            return False
+
 #consulta las calificaciones del estudiante
     def consultar_calificaciones(self, calificacion):
         return calificacion.obtener_resumen()
