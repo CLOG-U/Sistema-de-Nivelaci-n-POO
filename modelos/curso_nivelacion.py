@@ -12,8 +12,9 @@ class CursoNivelacion:
         self.__docente = docente
         self.__horario = horario
         self.__aula = aula
-        self.__lista_estudiantes = []
-
+        self.__lista_estudiantes = [] #lista para almacenar los estudiantes inscritos en el curso
+    
+    #uso de propiedades para acceder a los atributos privados
     @property
     def id_curso(self):
         return self.__id_curso
@@ -61,7 +62,8 @@ class CursoNivelacion:
     @property
     def lista_estudiantes(self):
         return self.__lista_estudiantes
-
+    
+    #setter para actualizar el cupo actual del curso, se valida que no se supere el cupo maximo ni que sea negativo
     @cupo_actual.setter
     def cupo_actual(self, valor):
         if valor > self.__cupo_maximo:
@@ -70,31 +72,36 @@ class CursoNivelacion:
             print("El cupo actual no puede ser negativo")
         else:
             self.__cupo_actual = valor
-
+    
+    #setter para actualizar el estado del curso a abierto
     def abrir_curso(self):
         self.__estado = True
         print("Curso " + self.__nombre + " abierto")
-
+    
+    #setter para actualizar el estado del curso a cerrado
     def cerrar_curso(self):
         self.__estado = False
         print("Curso " + self.__nombre + " cerrado")
-
+    
+    #metodo para agregar un estudiante al curso
     def agregar_estudiante(self, estudiante):
+        #se valida que no se supere el cupo maximo del curso antes de agregar al estudiante
         if self.__cupo_actual < self.__cupo_maximo:
             self.__lista_estudiantes.append(estudiante)
             self.__cupo_actual += 1
             print("Estudiante " + estudiante.nombres + " agregado al curso")
         else:
             print("No hay cupos disponibles en " + self.__nombre)
-
+    
+    #metodo para generar el horario del curso, se valida que el curso tenga un horario asignado antes de mostrarlo
     def generar_horario(self):
         if self.__horario is not None:
             self.__horario.mostrar_info()
         else:
             print("El curso no tiene horario asignado")
-
+    
+    #metodo para mostrar la informacion del curso
     def mostrar_info(self):
         print("Curso: " + self.__nombre + " paralelo: " + self.__paralelo + " cupos: " + str(self.__cupo_actual) + "/" + str(self.__cupo_maximo))
         print("Docente: " + self.__docente.nombres + " " + self.__docente.apellidos)
         print("Aula: " + self.__aula.nombre)
-
