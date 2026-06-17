@@ -15,6 +15,10 @@ class Aula:
         return self.__id_aula
 
     @property
+    def codigo(self):
+        return self.__codigo
+
+    @property
     def nombre(self):
         return self.__nombre
 

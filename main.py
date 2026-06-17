@@ -1,6 +1,5 @@
-from app.programa_principal import main
+from interfaz.ventana_principal import iniciar_interfaz
 
 
 if __name__ == "__main__":
-    main()
-
+    iniciar_interfaz()
