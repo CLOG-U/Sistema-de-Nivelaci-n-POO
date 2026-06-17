@@ -18,6 +18,7 @@ class SistemaNivelacion:
     def __init__(self):
         self.fabrica = FabricaUsuario()
         self.periodo_actual = "2026-1"
+        self.periodos_disponibles = [self.periodo_actual]
         self.usuarios = []
         self.aulas = []
         self.horarios = []
@@ -124,7 +125,12 @@ class SistemaNivelacion:
     def obtener_cursos_estudiante(self, estudiante):
         return [curso for curso in self.cursos if estudiante in curso.lista_estudiantes]
 
+    def listar_periodos(self):
+        return self.periodos_disponibles
+
     def generar_reporte(self, tipo_reporte, periodo, descripcion, formato):
+        if periodo not in self.periodos_disponibles:
+            raise ValueError("Seleccione un periodo valido")
         exportador = ExportarExcel() if formato == "Excel" else ExportarPDF()
         fecha_generacion = date.today().isoformat()
         reporte = Reporte(

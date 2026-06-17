@@ -1,4 +1,5 @@
 import tkinter as tk
+from datetime import date
 from tkinter import messagebox, ttk
 
 from modelos.admin import Administrador
@@ -236,8 +237,9 @@ class VentanaPrincipal(tk.Tk):
         formulario = ttk.Frame(contenido, style="Panel.TFrame", padding=14)
         formulario.pack(side="left", fill="y", padx=(0, 12))
         ttk.Label(formulario, text="Fecha generacion", style="Panel.TLabel").pack(anchor="w")
-        ttk.Label(formulario, text="Se toma automaticamente del dia actual", style="Panel.TLabel").pack(anchor="w", pady=(2, 12))
-        self.campos_reporte = self._crear_campos(formulario, ["Tipo reporte", "Periodo", "Descripcion"])
+        ttk.Label(formulario, text=date.today().isoformat(), style="Panel.TLabel").pack(anchor="w", pady=(2, 12))
+        self.campos_reporte = self._crear_campos(formulario, ["Tipo reporte", "Descripcion"])
+        self.combo_periodo_reporte = self._crear_combo(formulario, "Periodo")
         self.formato_reporte = tk.StringVar(value="PDF")
         ttk.Label(formulario, text="Formato", style="Panel.TLabel").pack(anchor="w")
         ttk.Combobox(formulario, textvariable=self.formato_reporte, values=["PDF", "Excel"], state="readonly").pack(fill="x", pady=(2, 8))
@@ -371,7 +373,7 @@ class VentanaPrincipal(tk.Tk):
         try:
             reporte = self.sistema.generar_reporte(
                 self._valor(self.campos_reporte["Tipo reporte"]),
-                self._valor(self.campos_reporte["Periodo"]),
+                self.combo_periodo_reporte.get(),
                 self._valor(self.campos_reporte["Descripcion"]),
                 self.formato_reporte.get(),
             )
@@ -619,6 +621,7 @@ class VentanaPrincipal(tk.Tk):
         self._llenar_combo(self.combo_estudiante_carga, self.sistema.listar_estudiantes())
         self._llenar_combo(self.combo_aula, self.sistema.aulas)
         self._llenar_combo(self.combo_curso, self.sistema.cursos)
+        self._llenar_combo_texto(self.combo_periodo_reporte, self.sistema.listar_periodos())
 
     def _llenar_combo(self, combo, objetos):
         combo.objetos = objetos
@@ -626,6 +629,13 @@ class VentanaPrincipal(tk.Tk):
         if objetos and not combo.get():
             combo.current(0)
         if not objetos:
+            combo.set("")
+
+    def _llenar_combo_texto(self, combo, valores):
+        combo["values"] = valores
+        if valores and not combo.get():
+            combo.current(0)
+        if not valores:
             combo.set("")
 
     def _objeto_seleccionado(self, combo, objetos):
