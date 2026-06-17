@@ -25,6 +25,7 @@ class VentanaPrincipal(tk.Tk):
         self.style.theme_use("clam")
         self.style.configure("TFrame", background="#f4f6f8")
         self.style.configure("Panel.TFrame", background="#ffffff", relief="solid", borderwidth=1)
+        self.style.configure("Form.TFrame", background="#ffffff", relief="flat", borderwidth=0)
         self.style.configure("TLabel", background="#f4f6f8", foreground="#1f2937", font=("Segoe UI", 10))
         self.style.configure("Title.TLabel", background="#f4f6f8", foreground="#111827", font=("Segoe UI", 18, "bold"))
         self.style.configure("Panel.TLabel", background="#ffffff", foreground="#1f2937", font=("Segoe UI", 10))
@@ -118,8 +119,9 @@ class VentanaPrincipal(tk.Tk):
             entrada.grid(row=fila * 2 + 1, column=0, sticky="ew", pady=(2, 8))
             self.campos_usuario[etiqueta] = entrada
 
-        self.extra_usuario = ttk.Frame(formulario, style="Panel.TFrame")
-        self.extra_usuario.grid(row=16, column=0, sticky="ew")
+        self.extra_usuario = ttk.Frame(formulario, style="Form.TFrame")
+        self.extra_usuario.grid(row=16, column=0, sticky="ew", pady=(0, 2))
+        self.extra_usuario.columnconfigure(0, weight=1)
         ttk.Button(formulario, text="Guardar usuario", command=self._registrar_usuario).grid(row=17, column=0, sticky="ew", pady=(12, 0))
 
         columnas = ("tipo", "cedula", "nombres", "correo", "detalle")
