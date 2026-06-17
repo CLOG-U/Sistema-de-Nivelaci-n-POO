@@ -161,22 +161,23 @@ class VentanaPrincipal(tk.Tk):
 
         aula_panel = ttk.Frame(gestor_formularios, padding=12, style="Form.TFrame")
         curso_panel = ttk.Frame(gestor_formularios, padding=12, style="Form.TFrame")
+        horario_panel = ttk.Frame(gestor_formularios, padding=12, style="Form.TFrame")
         inscripcion_panel = ttk.Frame(gestor_formularios, padding=12, style="Form.TFrame")
 
         gestor_formularios.add(aula_panel, text="Aula")
         gestor_formularios.add(curso_panel, text="Curso")
+        gestor_formularios.add(horario_panel, text="Horario")
         gestor_formularios.add(inscripcion_panel, text="Inscripcion")
-
-        curso_contenido = self._crear_frame_desplazable(curso_panel)
 
         self.campos_aula = self._crear_campos(aula_panel, ["Codigo", "Nombre", "Capacidad", "Piso", "Edificio"])
         ttk.Button(aula_panel, text="Guardar aula", command=self._registrar_aula).pack(fill="x", pady=(8, 0))
 
-        self.campos_curso = self._crear_campos(curso_contenido, ["Codigo", "Nombre", "Nivel", "Paralelo", "Cupo maximo"])
-        self.combo_docente = self._crear_combo(curso_contenido, "Docente")
-        self.combo_aula = self._crear_combo(curso_contenido, "Aula")
-        self.campos_horario = self._crear_campos(curso_contenido, ["Dia", "Hora inicio", "Hora fin", "Modalidad", "Grupo"])
-        ttk.Button(curso_contenido, text="Guardar curso", command=self._registrar_curso).pack(fill="x", pady=(8, 0))
+        self.campos_curso = self._crear_campos(curso_panel, ["Codigo", "Nombre", "Nivel", "Paralelo", "Cupo maximo"])
+        self.combo_docente = self._crear_combo(curso_panel, "Docente")
+        self.combo_aula = self._crear_combo(curso_panel, "Aula")
+
+        self.campos_horario = self._crear_campos(horario_panel, ["Dia", "Hora inicio", "Hora fin", "Modalidad", "Grupo"])
+        ttk.Button(horario_panel, text="Guardar curso", command=self._registrar_curso).pack(fill="x", pady=(8, 0))
 
         self.combo_curso = self._crear_combo(inscripcion_panel, "Curso")
         self.combo_estudiante = self._crear_combo(inscripcion_panel, "Estudiante")
@@ -213,27 +214,6 @@ class VentanaPrincipal(tk.Tk):
         self.tabla_reportes = self._crear_tabla(panel_salida, ("id", "tipo", "periodo", "formato"), ("ID", "Tipo", "Periodo", "Formato"))
         self.salida_reporte = tk.Text(panel_salida, height=8, wrap="word", font=("Segoe UI", 10))
         self.salida_reporte.pack(fill="x", pady=(10, 0))
-
-    def _crear_frame_desplazable(self, padre):
-        canvas = tk.Canvas(padre, background="#ffffff", highlightthickness=0)
-        barra = ttk.Scrollbar(padre, orient="vertical", command=canvas.yview)
-        contenido = ttk.Frame(canvas, style="Form.TFrame")
-
-        ventana = canvas.create_window((0, 0), window=contenido, anchor="nw")
-        canvas.configure(yscrollcommand=barra.set)
-
-        def ajustar_region(_event):
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        def ajustar_ancho(event):
-            canvas.itemconfigure(ventana, width=event.width)
-
-        contenido.bind("<Configure>", ajustar_region)
-        canvas.bind("<Configure>", ajustar_ancho)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        barra.pack(side="right", fill="y")
-        return contenido
 
     def _crear_campos(self, padre, etiquetas):
         campos = {}
