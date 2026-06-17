@@ -2,13 +2,14 @@ from modelos.iexportable import IExportable
 
 class Reporte(IExportable):
 
-    def __init__(self, id_reporte, tipo_reporte, fecha_generacion, periodo, descripcion, exportador):
+    def __init__(self, id_reporte, tipo_reporte, fecha_generacion, periodo, descripcion, exportador, formato=None):
         self.__id_reporte = id_reporte
         self.__tipo_reporte = tipo_reporte
         self.__fecha_generacion = fecha_generacion
         self.__periodo = periodo
         self.__descripcion = descripcion
         self.__exportador = exportador
+        self.__formato = formato if formato is not None else exportador.__class__.__name__.replace("Exportar", "")
 #uso de propiedades para acceder a los atributos privados
     @property
     def id_reporte(self):
@@ -29,6 +30,10 @@ class Reporte(IExportable):
     @property
     def descripcion(self):
         return self.__descripcion
+
+    @property
+    def formato(self):
+        return self.__formato
 
 #generamos un reporte con la informacion dada
     def generar_reporte(self):

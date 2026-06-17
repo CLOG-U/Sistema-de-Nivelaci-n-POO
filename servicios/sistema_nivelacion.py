@@ -140,6 +140,7 @@ class SistemaNivelacion:
             periodo,
             descripcion,
             exportador,
+            formato,
         )
         self.reportes.append(reporte)
         return reporte

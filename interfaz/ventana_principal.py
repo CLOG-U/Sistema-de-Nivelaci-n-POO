@@ -18,6 +18,7 @@ class VentanaPrincipal(tk.Tk):
         self.geometry("1080x680")
         self.minsize(960, 620)
         self.sistema = SistemaNivelacion()
+        self.reporte_activo_id = None
         self._configurar_estilos()
         self._crear_interfaz()
         self._actualizar_todo()
@@ -248,8 +249,10 @@ class VentanaPrincipal(tk.Tk):
         panel_salida = ttk.Frame(contenido)
         panel_salida.pack(side="left", fill="both", expand=True)
         self.tabla_reportes = self._crear_tabla(panel_salida, ("id", "tipo", "fecha", "periodo", "formato"), ("ID", "Tipo", "Fecha", "Periodo", "Formato"))
+        self.tabla_reportes.bind("<<TreeviewSelect>>", self._mostrar_reporte_seleccionado)
         self.salida_reporte = tk.Text(panel_salida, height=8, wrap="word", font=("Segoe UI", 10))
         self.salida_reporte.pack(fill="x", pady=(10, 0))
+        self._renderizar_reporte(None)
 
     def _crear_campos(self, padre, etiquetas):
         campos = {}
@@ -377,12 +380,7 @@ class VentanaPrincipal(tk.Tk):
                 self._valor(self.campos_reporte["Descripcion"]),
                 self.formato_reporte.get(),
             )
-            self.salida_reporte.delete("1.0", "end")
-            self.salida_reporte.insert("end", "Reporte: " + reporte.tipo_reporte + "\n")
-            self.salida_reporte.insert("end", "Fecha de generacion: " + reporte.fecha_generacion + "\n")
-            self.salida_reporte.insert("end", "Periodo: " + reporte.periodo + "\n")
-            self.salida_reporte.insert("end", "Descripcion: " + reporte.descripcion + "\n")
-            self.salida_reporte.insert("end", "Formato: " + self.formato_reporte.get())
+            self.reporte_activo_id = reporte.id_reporte
             self._limpiar_campos(self.campos_reporte)
             self._actualizar_todo()
         except Exception as error:
@@ -573,6 +571,31 @@ class VentanaPrincipal(tk.Tk):
         ]
         self._llenar_detalle(ventana, datos)
 
+    def _mostrar_reporte_seleccionado(self, _event=None):
+        seleccion = self.tabla_reportes.selection()
+        if not seleccion:
+            return
+
+        reporte = self.objetos_reportes.get(seleccion[0])
+        if reporte is not None:
+            self.reporte_activo_id = reporte.id_reporte
+            self._renderizar_reporte(reporte)
+
+    def _renderizar_reporte(self, reporte):
+        self.salida_reporte.configure(state="normal")
+        self.salida_reporte.delete("1.0", "end")
+
+        if reporte is None:
+            self.salida_reporte.insert("end", "Seleccione un reporte para ver su detalle.")
+        else:
+            self.salida_reporte.insert("end", "Reporte: " + reporte.tipo_reporte + "\n")
+            self.salida_reporte.insert("end", "Fecha de generacion: " + reporte.fecha_generacion + "\n")
+            self.salida_reporte.insert("end", "Periodo: " + reporte.periodo + "\n")
+            self.salida_reporte.insert("end", "Descripcion: " + reporte.descripcion + "\n")
+            self.salida_reporte.insert("end", "Formato: " + reporte.formato)
+
+        self.salida_reporte.configure(state="disabled")
+
     def _crear_ventana_detalle(self, titulo):
         ventana = tk.Toplevel(self)
         ventana.title(titulo)
@@ -612,8 +635,23 @@ class VentanaPrincipal(tk.Tk):
 
     def _actualizar_reportes(self):
         self._vaciar_tabla(self.tabla_reportes)
+        self.objetos_reportes = {}
+        item_activo = None
+
         for reporte in self.sistema.reportes:
-            self.tabla_reportes.insert("", "end", values=(reporte.id_reporte, reporte.tipo_reporte, reporte.fecha_generacion, reporte.periodo, "Generado"))
+            item = self.tabla_reportes.insert("", "end", values=(reporte.id_reporte, reporte.tipo_reporte, reporte.fecha_generacion, reporte.periodo, reporte.formato))
+            self.objetos_reportes[item] = reporte
+            if reporte.id_reporte == self.reporte_activo_id:
+                item_activo = item
+
+        if item_activo is not None:
+            self.tabla_reportes.selection_set(item_activo)
+            self.tabla_reportes.focus(item_activo)
+            self.tabla_reportes.see(item_activo)
+            self._renderizar_reporte(self.objetos_reportes[item_activo])
+        elif self.reporte_activo_id is not None:
+            self.reporte_activo_id = None
+            self._renderizar_reporte(None)
 
     def _actualizar_combos(self):
         self._llenar_combo(self.combo_docente, self.sistema.listar_docentes())
