@@ -1,11 +1,11 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
+import tkinter as tk  # Importación de la biblioteca Tkinter para la interfaz gráfica
+from tkinter import messagebox, ttk  # Importación de componentes adicionales de Tkinter
 
 from modelos.admin import Administrador
 from servicios.sistema_nivelacion import SistemaNivelacion
 
 
-class VentanaLogin(tk.Tk):
+class VentanaLogin(tk.Tk):             #Ventana encargada de la autenticación de administradores.                                                  
 
     def __init__(self):
         super().__init__()
@@ -73,9 +73,9 @@ class VentanaLogin(tk.Tk):
             messagebox.showerror("Error", "Contraseña incorrecta o usuario inactivo")
 
 
-class VentanaPrincipal(tk.Tk):
-
-    def __init__(self, admin):
+class VentanaPrincipal(tk.Tk):       #Ventana principal del sistema. 
+                                 #    Permite al administrador gestionar usuarios,
+    def __init__(self, admin):    #cursos, procesos, reportes y parámetros del sistema.
         super().__init__()
         self.admin = admin
         self.title(f"Bienvenido admin: {admin.nombres} {admin.apellidos}")
@@ -136,7 +136,7 @@ class VentanaPrincipal(tk.Tk):
         self._crear_tab_configurar_parametros()
         self._crear_tab_cursos()
 
-    def _crear_tab_inicio(self):
+    def _crear_tab_inicio(self):  # Crea el panel de métricas generales del sistema.
         self.metricas = {}
         grilla = ttk.Frame(self.tab_inicio)
         grilla.pack(fill="x")
@@ -152,7 +152,8 @@ class VentanaPrincipal(tk.Tk):
         for columna in range(4):
             grilla.columnconfigure(columna, weight=1)
 
-    def _crear_tab_usuarios(self):
+    def _crear_tab_usuarios(self): #    Crea la interfaz para activar o desactivar usuarios
+                                    # del sistema.
         acciones = ttk.LabelFrame(self.tab_usuarios, text="Gestión de usuarios", padding=12, style="Panel.TFrame")
         acciones.pack(fill="x", pady=18)
 
