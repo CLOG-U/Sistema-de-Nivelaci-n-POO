@@ -1,4 +1,4 @@
-from datetime import date   #Este módulo administra los procesos académicos del sistema:
+from datetime import date  # Este módulo administra los procesos académicos del sistema:
 
 from modelos.aula import Aula
 from modelos.carga_academica import CargaAcademica
@@ -10,6 +10,8 @@ from modelos.admin import Administrador
 from modelos.docente import Docente
 from modelos.estudiante import Estudiante
 from servicios.fabrica import FabricaUsuario
+from datetime import date
+from BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
 
 #La clase SistemaNivelacion actúa como el núcleo del sistema,
 #centralizando toda la información y operaciones del sistema.
