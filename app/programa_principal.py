@@ -13,6 +13,8 @@ from modelos.horario import Horario
 from modelos.usuario import Usuario
 from servicios.fabrica import FabricaUsuario
 from servicios.sistema_nivelacion import SistemaNivelacion
+from servicios.matricula_facade import MatriculaFacade
+from modelos.periodo_academico import PeriodoAcademico
 
 
 def main():
@@ -60,6 +62,12 @@ def main():
     carga1.generar_carga()
     print("")
 
+    print("Usando el patron facade para matricular estudiantes")
+    periodo1 = PeriodoAcademico(1, "2026-1", "2026-01-01", "2026-06-30", "Abierto")
+    facade = MatriculaFacade(periodo1, curso1, estudiante1)
+    facade.matricular(1, "2026-01-10", "Regular")
+    print("")
+
     # ================================================================
     # Patron Strategy: el cliente (SistemaNivelacion.generar_reporte)
     # decide en tiempo de ejecucion QUE estrategia de exportacion usar
@@ -88,3 +96,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
