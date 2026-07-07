@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import aula_to_dict
 
 
@@ -33,7 +34,7 @@ def _formulario_aula(sistema):
 
 
 def mostrar_aulas(sistema):
-    st.title("Aulas")
+    encabezado_pagina("Gestion de aulas")
 
     _formulario_aula(sistema)
 

@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import carga_to_dict
 
 
@@ -32,7 +33,7 @@ def _formulario_carga(sistema):
 
 
 def mostrar_cargas(sistema):
-    st.title("Cargas Academicas")
+    encabezado_pagina("Cargas academicas")
 
     _formulario_carga(sistema)
 

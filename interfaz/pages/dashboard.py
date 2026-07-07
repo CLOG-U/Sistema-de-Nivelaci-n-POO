@@ -1,11 +1,13 @@
 import streamlit as st
 
+from interfaz.branding import NOMBRE_SISTEMA, encabezado_pagina
 from interfaz.components.cards import metric_card
 
 
 def mostrar_dashboard(sistema):
-    st.title("Sistema de Nivelacion POO")
-    st.subheader("Panel de administracion academica")
+    encabezado_pagina("Panel de administracion academica")
+
+    st.markdown(f"**{NOMBRE_SISTEMA}** · Resumen general del periodo activo")
 
     resumen = sistema.resumen()
     etiquetas = {

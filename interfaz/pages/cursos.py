@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import curso_to_dict
 
 
@@ -50,7 +51,7 @@ def _formulario_curso(sistema):
 
 
 def mostrar_cursos(sistema):
-    st.title("Cursos")
+    encabezado_pagina("Gestion de cursos de nivelacion")
 
     _formulario_curso(sistema)
 

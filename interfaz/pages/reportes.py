@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import reporte_to_dict
 
 
@@ -35,7 +36,7 @@ def _formulario_reporte(sistema):
 
 
 def mostrar_reportes(sistema):
-    st.title("Reportes")
+    encabezado_pagina("Reportes academicos")
 
     _formulario_reporte(sistema)
 

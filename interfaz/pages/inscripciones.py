@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import usuario_to_dict
 
 
@@ -61,7 +62,7 @@ def _tabla_inscritos_por_curso(sistema):
 
 
 def mostrar_inscripciones(sistema):
-    st.title("Inscripciones")
+    encabezado_pagina("Inscripciones academicas")
 
     _formulario_inscripcion(sistema)
     st.divider()

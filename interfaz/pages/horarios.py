@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.tables import horario_to_dict
 
 
@@ -42,7 +43,7 @@ def _formulario_horario(sistema):
 
 
 def mostrar_horarios(sistema):
-    st.title("Horarios")
+    encabezado_pagina("Gestion de horarios")
 
     _formulario_horario(sistema)
 

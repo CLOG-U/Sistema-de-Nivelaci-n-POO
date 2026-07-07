@@ -1,5 +1,6 @@
 import streamlit as st
 
+from interfaz.branding import encabezado_pagina
 from interfaz.components.forms import campos_usuario_base
 from interfaz.components.tables import usuario_to_dict
 
@@ -129,7 +130,7 @@ def _formulario_administrador(sistema):
 
 
 def mostrar_usuarios(sistema):
-    st.title("Usuarios")
+    encabezado_pagina("Gestion de usuarios")
 
     _formulario_estudiante(sistema)
     st.divider()
