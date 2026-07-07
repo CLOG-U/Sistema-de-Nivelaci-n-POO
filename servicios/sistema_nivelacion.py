@@ -1,5 +1,4 @@
 from datetime import date  
-
 from modelos.aula import Aula
 from modelos.carga_academica import CargaAcademica
 from modelos.curso_nivelacion import CursoNivelacion
@@ -27,22 +26,24 @@ class SistemaNivelacion:
         
         # Crea el objeto de conexión con la base de datos.
         self.db = ConexionDB()
-        
+        # Diccionarios donde se almacenan los datos del sistema.
         self.usuarios = {}
         self.aulas = {}
         self.horarios = {}
         self.cursos = {}
         self.cargas_academicas = {}
         self.reportes = {}
-
+    # Guarda todos los usuarios registrados en SQL Server.
     def guardar_usuarios_en_db(self):
         try:
+            # Establece la conexión con la base de datos.
             self.db.conectar()
             
-
+            # Consulta SQL para insertar usuarios.
             query = "INSERT INTO usuarios (id, nombres, apellidos) VALUES (%s, %s, %s)"
-            
+            # Recorre todos los usuarios registrados.
             for id_usuario, usuario in self.usuarios.items():
+                # Crea una tupla con los datos que se insertarán.
                 valores = (id_usuario, usuario.nombres, usuario.apellidos)
                 self.db.cursor.execute(query, valores)
             
