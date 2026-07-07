@@ -13,12 +13,8 @@ from servicios.fabrica import FabricaUsuario
 from datetime import date
 from BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
 
-#La clase SistemaNivelacion actúa como el núcleo del sistema,
-#centralizando toda la información y operaciones del sistema.
 
 class SistemaNivelacion:
-
-# ... (tus otros imports de modelos) ...
 
     CREDITOS_POR_CURSO = 4
 
@@ -27,7 +23,7 @@ class SistemaNivelacion:
         self.periodo_actual = "2026-1"
         self.periodos_disponibles = [self.periodo_actual] 
         
-        # Instanciamos la conexión a la base de datos
+       
         self.db = ConexionDB()
         
         self.usuarios = {}
@@ -36,10 +32,28 @@ class SistemaNivelacion:
         self.cursos = {}
         self.cargas_academicas = {}
         self.reportes = {}
-
+        
+    def guardar_usuarios_en_db(self):
+        try:
+            self.db.conectar()
+            
+            query = "INSERT INTO usuarios (id, nombres, apellidos) VALUES (%s, %s, %s)"
+            
+            for id_usuario, usuario in self.usuarios.items():
+                valores = (id_usuario, usuario.nombres, usuario.apellidos)
+                self.db.cursor.execute(query, valores)
+            
+            self.db.conn.commit()  
+            print(f"Se guardaron {len(self.usuarios)} usuarios exitosamente.")
+            
+        except Exception as e:
+            print(f"Error al guardar en la base de datos: {e}")
+            
+        finally:
+            self.db.cerrar()  
 
     def registrar_usuario(self, tipo_usuario, cedula, nombres, apellidos, correo, contrasena, telefono, **datos):
-        # Se genera un ID único basado en la cantidad de usuarios registrados actualmente
+        
         id_usuario = len(self.usuarios) + 1
 
         if tipo_usuario == "Docente":
