@@ -39,7 +39,9 @@ def main():
     st.set_page_config(page_title="Sistema de Nivelacion POO", layout="wide")
 
     from interfaz.state import get_sistema
+    from interfaz.styles import aplicar_estilos
 
+    aplicar_estilos()
     sistema = get_sistema()
 
     st.sidebar.title("Menu")

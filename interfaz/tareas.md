@@ -31,7 +31,7 @@ Comando: `streamlit run interfaz/app.py`
 | HU-18 | Listar cargas academicas | hecho |
 | HU-19 | Generar reporte | hecho |
 | HU-20 | Listar reportes generados | hecho |
-| HU-21 | Estilos globales | pendiente |
+| HU-21 | Estilos globales | hecho |
 | HU-22 | Componentes reutilizables | pendiente |
 
 ---
