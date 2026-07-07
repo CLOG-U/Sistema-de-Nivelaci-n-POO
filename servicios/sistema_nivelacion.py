@@ -177,17 +177,21 @@ class SistemaNivelacion:
     # Obtiene los cursos donde está inscrito un estudiante.
     def obtener_cursos_estudiante(self, estudiante):
         return [curso for curso in self.cursos.values() if estudiante in curso.lista_estudiantes]
-
+    # Devuelve todos los períodos disponibles.
     def listar_periodos(self):
         return self.periodos_disponibles
-
+    # Genera un reporte.
     def generar_reporte(self, tipo_reporte, periodo, descripcion, formato):
+        # Verifica que el período exista.
         if periodo not in self.periodos_disponibles:
             raise ValueError("Seleccione un periodo valido")
+        # Selecciona el tipo de exportación.
         exportador = ExportarExcel() if formato == "Excel" else ExportarPDF()
+        # Fecha actual.
         fecha_generacion = date.today().isoformat()
         
         id_reporte = len(self.reportes) + 1
+        # Crea el reporte.
         reporte = Reporte(
             id_reporte,
             tipo_reporte,
@@ -196,15 +200,16 @@ class SistemaNivelacion:
             descripcion,
             exportador,
         )
+        # Guarda el reporte.
         self.reportes[id_reporte] = reporte
         return reporte
-
+    # Devuelve todos los docentes.
     def listar_docentes(self):
         return [usuario for usuario in self.usuarios.values() if isinstance(usuario, Docente)]
-
+    # Devuelve todos los estudiantes.
     def listar_estudiantes(self):
         return [usuario for usuario in self.usuarios.values() if isinstance(usuario, Estudiante)]
-
+    # Devuelve un resumen del sistema.
     def resumen(self):
         return {
             "usuarios": len(self.usuarios),
