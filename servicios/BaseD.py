@@ -33,9 +33,11 @@ class ConexionDB:
             # Muestra un mensaje indicando que ocurrió un error.
             print(f"Error crítico al conectar a SQL Server: {e}")
             raise e
-
+     # Método encargado de cerrar la conexión con la base de datos.
     def cerrar(self):
+         # Si existe un cursor, lo cierra.
         if self.cursor:
             self.cursor.close()
+        # Si existe una conexión, la cierra.
         if self.conn:
             self.conn.close()
