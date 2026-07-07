@@ -45,18 +45,22 @@ class SistemaNivelacion:
             for id_usuario, usuario in self.usuarios.items():
                 # Crea una tupla con los datos que se insertarán.
                 valores = (id_usuario, usuario.nombres, usuario.apellidos)
+                 # Ejecuta la consulta SQL.
                 self.db.cursor.execute(query, valores)
-            
+                
+             # Guarda definitivamente los cambios.
             self.db.conn.commit()  
+            # Mensaje de éxito.
             print(f"Se guardaron {len(self.usuarios)} usuarios exitosamente.")
-            
+         # Captura cualquier error.
         except Exception as e:
             print(f"Error al guardar en la base de datos: {e}")
-            
+        # Cierra siempre la conexión.
         finally:
             self.db.cerrar()  
-
+    # Registra un nuevo usuario.
     def registrar_usuario(self, tipo_usuario, cedula, nombres, apellidos, correo, contrasena, telefono, **datos):
+        # Genera un ID automático.
         id_usuario = len(self.usuarios) + 1
 
         if tipo_usuario == "Docente":
