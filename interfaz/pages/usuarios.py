@@ -80,12 +80,48 @@ def _formulario_docente(sistema):
             st.error(str(error))
 
 
+def _formulario_administrador(sistema):
+    st.subheader("Registrar administrador")
+
+    with st.form("form_administrador"):
+        cedula = st.text_input("Cedula", key="adm_cedula")
+        nombres = st.text_input("Nombres", key="adm_nombres")
+        apellidos = st.text_input("Apellidos", key="adm_apellidos")
+        correo = st.text_input("Correo", key="adm_correo")
+        contrasena = st.text_input("Contrasena", type="password", key="adm_contrasena")
+        telefono = st.text_input("Telefono", key="adm_telefono")
+        cargo = st.text_input("Cargo")
+
+        enviado = st.form_submit_button("Registrar administrador")
+
+    if enviado:
+        try:
+            if not all([cedula, nombres, apellidos, correo, contrasena, telefono, cargo]):
+                raise ValueError("Complete todos los campos obligatorios")
+
+            administrador = sistema.registrar_usuario(
+                "Administrador",
+                cedula.strip(),
+                nombres.strip(),
+                apellidos.strip(),
+                correo.strip(),
+                contrasena.strip(),
+                telefono.strip(),
+                cargo=cargo.strip(),
+            )
+            st.success(f"Administrador registrado: {administrador.nombres} {administrador.apellidos}")
+        except Exception as error:
+            st.error(str(error))
+
+
 def mostrar_usuarios(sistema):
     st.title("Usuarios")
 
     _formulario_estudiante(sistema)
     st.divider()
     _formulario_docente(sistema)
+    st.divider()
+    _formulario_administrador(sistema)
 
     st.divider()
     st.subheader("Usuarios registrados")
