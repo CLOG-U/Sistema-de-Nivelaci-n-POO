@@ -109,8 +109,9 @@ class SistemaNivelacion:
         return aula
 
     def registrar_horario(self, dia, hora_inicio, hora_fin, modalidad, grupo, aula):
-        horario = Horario(len(self.horarios) + 1, dia, hora_inicio, hora_fin, modalidad, grupo, aula)
-        self.horarios.append(horario)
+        id_horario = len(self.horarios) + 1
+        horario = Horario(id_horario, dia, hora_inicio, hora_fin, modalidad, grupo, aula)
+        self.horarios[id_horario] = horario
         return horario
 
     def registrar_curso(self, codigo, nombre, nivel, paralelo, cupo_maximo, docente, horario, aula):
