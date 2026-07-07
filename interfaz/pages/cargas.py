@@ -1,5 +1,7 @@
 import streamlit as st
 
+from interfaz.components.tables import carga_to_dict
+
 
 def _formulario_carga(sistema):
     st.subheader("Registrar carga academica")
@@ -31,4 +33,15 @@ def _formulario_carga(sistema):
 
 def mostrar_cargas(sistema):
     st.title("Cargas Academicas")
+
     _formulario_carga(sistema)
+
+    st.divider()
+    st.subheader("Cargas academicas registradas")
+
+    if not sistema.cargas_academicas:
+        st.warning("No hay cargas academicas registradas.")
+        return
+
+    filas = [carga_to_dict(carga) for carga in sistema.cargas_academicas]
+    st.dataframe(filas, use_container_width=True, hide_index=True)
