@@ -140,8 +140,6 @@ class SistemaNivelacion:
     def registrar_carga_academica(self, estudiante):
         cursos_estudiante = self.obtener_cursos_estudiante(estudiante)
         total_asignaturas = len(cursos_estudiante)
-        if total_asignaturas == 0:
-            raise ValueError("El estudiante no tiene cursos inscritos")
 
         for carga in self.cargas_academicas:
             if carga.estudiante == estudiante and carga.periodo == self.periodo_actual:
