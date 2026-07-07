@@ -11,7 +11,7 @@ from modelos.docente import Docente
 from modelos.estudiante import Estudiante
 from servicios.fabrica import FabricaUsuario
 from datetime import date
-from BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
+from servicios.BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
 
 class SistemaNivelacion:
 
