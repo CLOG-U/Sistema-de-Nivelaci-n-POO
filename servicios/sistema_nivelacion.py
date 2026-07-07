@@ -1,4 +1,4 @@
-from datetime import date  # Este módulo administra los procesos académicos del sistema:
+from datetime import date  
 
 from modelos.aula import Aula
 from modelos.carga_academica import CargaAcademica
@@ -13,7 +13,6 @@ from servicios.fabrica import FabricaUsuario
 from datetime import date
 from BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
 
-
 class SistemaNivelacion:
 
     CREDITOS_POR_CURSO = 4
@@ -23,7 +22,7 @@ class SistemaNivelacion:
         self.periodo_actual = "2026-1"
         self.periodos_disponibles = [self.periodo_actual] 
         
-       
+        # Instanciamos la conexión a la base de datos
         self.db = ConexionDB()
         
         self.usuarios = {}
@@ -32,11 +31,12 @@ class SistemaNivelacion:
         self.cursos = {}
         self.cargas_academicas = {}
         self.reportes = {}
-        
+
     def guardar_usuarios_en_db(self):
         try:
             self.db.conectar()
             
+
             query = "INSERT INTO usuarios (id, nombres, apellidos) VALUES (%s, %s, %s)"
             
             for id_usuario, usuario in self.usuarios.items():
@@ -83,6 +83,7 @@ class SistemaNivelacion:
                 datos.get("discapacidad", False),
             )
         elif tipo_usuario == "Administrador":
+            # Uso de .values() para iterar sobre los elementos del diccionario
             cantidad_admins = sum(1 for u in self.usuarios.values() if isinstance(u, Administrador))
             usuario = self.fabrica.crear_usuario(
                 "Administrador",
@@ -137,7 +138,7 @@ class SistemaNivelacion:
         estudiante.estado_nivelacion = "En Curso"
         return curso
 
-        def registrar_carga_academica(self, estudiante):
+    def registrar_carga_academica(self, estudiante):
         cursos_estudiante = self.obtener_cursos_estudiante(estudiante)
         total_asignaturas = len(cursos_estudiante)
         
