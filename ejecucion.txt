@@ -6,3 +6,6 @@ cd "Sistema-de-Nivelaci-n-POO-main"
 
 verificar archivos:
 dir
+
+levantar weblocal:
+python -m streamlit run interfaz/app.py
