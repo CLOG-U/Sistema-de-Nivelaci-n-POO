@@ -137,18 +137,22 @@ class SistemaNivelacion:
         estudiante.estado_nivelacion = "En Curso"
         return curso
 
-    def registrar_carga_academica(self, estudiante):
+        def registrar_carga_academica(self, estudiante):
         cursos_estudiante = self.obtener_cursos_estudiante(estudiante)
         total_asignaturas = len(cursos_estudiante)
+        
+        if total_asignaturas == 0:
+            raise ValueError("El estudiante no tiene cursos inscritos")
 
-        for carga in self.cargas_academicas:
+        # Iteración sobre los valores del diccionario de cargas
+        for carga in self.cargas_academicas.values():
             if carga.estudiante == estudiante and carga.periodo == self.periodo_actual:
                 raise ValueError("El estudiante ya tiene una carga academica registrada en el periodo actual")
 
-        # Se calcula el total de créditos multiplicando la cantidad de asignaturas por los créditos fijos por curso
         total_creditos = total_asignaturas * self.CREDITOS_POR_CURSO
-        carga = CargaAcademica(len(self.cargas_academicas) + 1, estudiante, self.periodo_actual, total_asignaturas, total_creditos)
-        self.cargas_academicas.append(carga)
+        id_carga = len(self.cargas_academicas) + 1
+        carga = CargaAcademica(id_carga, estudiante, self.periodo_actual, total_asignaturas, total_creditos)
+        self.cargas_academicas[id_carga] = carga
         return carga
 
     def obtener_cursos_estudiante(self, estudiante):
