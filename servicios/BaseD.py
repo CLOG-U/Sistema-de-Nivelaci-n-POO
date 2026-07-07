@@ -26,9 +26,11 @@ class ConexionDB:
             )
             # Crea la conexión utilizando la cadena anterior.
             self.conn = pyodbc.connect(conexion_str)
+             # Crea un cursor para poder ejecutar instrucciones SQL.
             self.cursor = self.conn.cursor()
-            
+         # Captura cualquier error que ocurra durante la conexión.
         except pyodbc.Error as e:
+            # Muestra un mensaje indicando que ocurrió un error.
             print(f"Error crítico al conectar a SQL Server: {e}")
             raise e
 
