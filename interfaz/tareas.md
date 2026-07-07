@@ -32,19 +32,19 @@ Comando: `streamlit run interfaz/app.py`
 | HU-19 | Generar reporte | hecho |
 | HU-20 | Listar reportes generados | hecho |
 | HU-21 | Estilos globales | hecho |
-| HU-22 | Componentes reutilizables | pendiente |
+| HU-22 | Componentes reutilizables | hecho |
 
 ---
 
 ## Checklist final
 
-- [ ] La app corre con streamlit run interfaz/app.py
-- [ ] Dashboard muestra datos demo
-- [ ] Registro de estudiante, docente y administrador
-- [ ] Registro de aula y horario
-- [ ] Creacion de curso con docente, horario y aula
-- [ ] Inscripcion de estudiante en curso
-- [ ] Generacion de carga academica
-- [ ] Generacion de reporte PDF o Excel
-- [ ] Tablas se actualizan al registrar datos
-- [ ] Interfaz lista para presentacion academica
+- [x] La app corre con streamlit run interfaz/app.py
+- [x] Dashboard muestra datos demo
+- [x] Registro de estudiante, docente y administrador
+- [x] Registro de aula y horario
+- [x] Creacion de curso con docente, horario y aula
+- [x] Inscripcion de estudiante en curso
+- [x] Generacion de carga academica
+- [x] Generacion de reporte PDF o Excel
+- [x] Tablas se actualizan al registrar datos
+- [x] Interfaz lista para presentacion academica

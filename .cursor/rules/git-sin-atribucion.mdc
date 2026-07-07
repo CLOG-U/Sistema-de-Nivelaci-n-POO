@@ -1,0 +1,10 @@
+---
+description: Commits sin atribucion de Cursor
+alwaysApply: true
+---
+
+# Commits sin atribucion de Cursor
+
+- No agregar `Co-authored-by: Cursor`, `Made-with: Cursor` ni trailers similares.
+- Usar solo `git commit -m "mensaje"` con descripcion sencilla en espanol.
+- No usar `--trailer` en commits.
