@@ -53,7 +53,6 @@ class SistemaNivelacion:
             self.db.cerrar()  
 
     def registrar_usuario(self, tipo_usuario, cedula, nombres, apellidos, correo, contrasena, telefono, **datos):
-        
         id_usuario = len(self.usuarios) + 1
 
         if tipo_usuario == "Docente":
@@ -84,6 +83,7 @@ class SistemaNivelacion:
                 datos.get("discapacidad", False),
             )
         elif tipo_usuario == "Administrador":
+            cantidad_admins = sum(1 for u in self.usuarios.values() if isinstance(u, Administrador))
             usuario = self.fabrica.crear_usuario(
                 "Administrador",
                 id_usuario,
@@ -93,13 +93,13 @@ class SistemaNivelacion:
                 correo,
                 contrasena,
                 telefono,
-                len([u for u in self.usuarios if isinstance(u, Administrador)]) + 1,
+                cantidad_admins + 1,
                 datos.get("cargo", ""),
             )
         else:
             raise ValueError("Tipo de usuario no valido")
 
-        self.usuarios.append(usuario)
+        self.usuarios[id_usuario] = usuario
         return usuario
 
     def registrar_aula(self, codigo, nombre, capacidad, piso, edificio):
