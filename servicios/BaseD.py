@@ -26,3 +26,9 @@ class ConexionDB:
         except pyodbc.Error as e:
             print(f"Error crítico al conectar a SQL Server: {e}")
             raise e
+
+    def cerrar(self):
+        if self.cursor:
+            self.cursor.close()
+        if self.conn:
+            self.conn.close()
