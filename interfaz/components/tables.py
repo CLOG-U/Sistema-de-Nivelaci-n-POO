@@ -49,3 +49,25 @@ def horario_to_dict(horario):
         "Grupo": horario.grupo,
         "Aula": aula_texto,
     }
+
+
+def curso_to_dict(curso):
+    docente = curso.docente
+    docente_texto = f"{docente.nombres} {docente.apellidos}" if docente else "Sin docente"
+    aula = curso.aula
+    aula_texto = f"{aula.codigo} - {aula.nombre}" if aula else "Sin aula"
+    horario = curso.horario
+    horario_texto = f"{horario.dia} {horario.hora_inicio}-{horario.hora_fin}" if horario else "Sin horario"
+    return {
+        "ID": curso.id_curso,
+        "Codigo": curso.codigo,
+        "Nombre": curso.nombre,
+        "Nivel": curso.nivel,
+        "Paralelo": curso.paralelo,
+        "Cupo": f"{curso.cupo_actual}/{curso.cupo_maximo}",
+        "Docente": docente_texto,
+        "Aula": aula_texto,
+        "Horario": horario_texto,
+        "Estado": "Abierto" if curso.estado else "Cerrado",
+    }
+

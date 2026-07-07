@@ -23,7 +23,7 @@ Comando: `streamlit run interfaz/app.py`
 | HU-10 | Registrar aula | hecho |
 | HU-11 | Listar horarios | hecho |
 | HU-12 | Registrar horario | hecho |
-| HU-13 | Listar cursos | pendiente |
+| HU-13 | Listar cursos | hecho |
 | HU-14 | Registrar curso | pendiente |
 | HU-15 | Inscribir estudiante en curso | pendiente |
 | HU-16 | Ver estudiantes inscritos por curso | pendiente |
