@@ -1,5 +1,7 @@
 import streamlit as st
 
+from interfaz.components.tables import reporte_to_dict
+
 
 def _formulario_reporte(sistema):
     st.subheader("Generar reporte")
@@ -34,4 +36,15 @@ def _formulario_reporte(sistema):
 
 def mostrar_reportes(sistema):
     st.title("Reportes")
+
     _formulario_reporte(sistema)
+
+    st.divider()
+    st.subheader("Reportes generados")
+
+    if not sistema.reportes:
+        st.warning("No hay reportes generados.")
+        return
+
+    filas = [reporte_to_dict(reporte) for reporte in sistema.reportes]
+    st.dataframe(filas, use_container_width=True, hide_index=True)
