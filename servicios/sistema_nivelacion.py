@@ -196,6 +196,7 @@ class SistemaNivelacion:
         }
 
     def cargar_datos_demo(self):
+        # Los diccionarios también evalúan a False si están vacíos, por lo que esta lógica se mantiene
         if self.usuarios or self.aulas or self.cursos:
             return
 
