@@ -9,9 +9,11 @@ class ConexionDB:
         
         self.driver = "{ODBC Driver 17 for SQL Server}"
         # Variable donde se almacenará la conexión con SQL Server.
+        # Inicialmente no existe conexión.
         self.conn = None
+         # Variable donde se almacenará el cursor para ejecutar consultas SQL.
         self.cursor = None
-        
+     # Método que establece la conexión con la base de datos.
     def conectar(self):
         try:
 
