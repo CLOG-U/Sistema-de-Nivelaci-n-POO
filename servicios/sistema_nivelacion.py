@@ -15,6 +15,7 @@ from modelos.reporte import Reporte
 from servicios.BaseD import ConexionDB
 from servicios.fabrica import FabricaUsuario
 from servicios.matricula_facade import MatriculaFacade
+from servicios.repositorios.persistencia import PersistenciaSQL
 # Clase principal del Sistema de Nivelación
 class SistemaNivelacion:
     # Constante que representa los créditos asignados a cada curso.
@@ -27,11 +28,12 @@ class SistemaNivelacion:
         self.matriculas = {}
         self.calificaciones = {}
         self.asistencias = {}
-        self.periodo_actual = "2026-1"
-        self.periodos_disponibles = [self.periodo_actual]
-        self._inicializar_periodos()
+        self.periodo_actual = None
+        self.periodos_disponibles = []
 
         self.db = ConexionDB()
+        self._persistencia = PersistenciaSQL(self.db)
+        self._db_activa = False
         self.usuarios = {}
         self.aulas = {}
         self.horarios = {}
@@ -55,10 +57,12 @@ class SistemaNivelacion:
     def registrar_periodo(self, nombre, fecha_inicio, fecha_fin, estado="Abierto"):
         if self.obtener_periodo(nombre):
             raise ValueError("Ya existe un periodo con ese nombre")
-        id_periodo = len(self.periodos) + 1
+        id_periodo = self._siguiente_id(self.periodos, "PeriodoAcademico", "id_periodo")
         periodo = PeriodoAcademico(id_periodo, nombre, fecha_inicio, fecha_fin, estado)
         self.periodos[id_periodo] = periodo
         self._sincronizar_periodos_disponibles()
+        if self._db_activa:
+            self._persistencia.guardar_periodo(periodo)
         return periodo
 
     def establecer_periodo_actual(self, nombre_periodo):
@@ -73,6 +77,8 @@ class SistemaNivelacion:
         if not periodo:
             raise ValueError("Periodo academico no valido")
         periodo.abrir_periodo()
+        if self._db_activa:
+            self._persistencia.actualizar_periodo(periodo)
         return periodo
 
     def cerrar_periodo(self, nombre_periodo):
@@ -80,6 +86,8 @@ class SistemaNivelacion:
         if not periodo:
             raise ValueError("Periodo academico no valido")
         periodo.cerrar_periodo()
+        if self._db_activa:
+            self._persistencia.actualizar_periodo(periodo)
         return periodo
 
     def obtener_periodo(self, nombre_o_id):
@@ -100,18 +108,26 @@ class SistemaNivelacion:
     def gestionar_usuario(self, administrador, accion, usuario, motivo=None, fecha=None):
         if not isinstance(administrador, Administrador):
             raise ValueError("Solo un administrador puede gestionar usuarios")
-        return administrador.gestionar_usuario(accion, usuario, motivo, fecha)
+        resultado = administrador.gestionar_usuario(accion, usuario, motivo, fecha)
+        if self._db_activa:
+            self._persistencia.actualizar_usuario(usuario)
+        return resultado
 
     def gestionar_curso(self, administrador, accion, curso):
         if not isinstance(administrador, Administrador):
             raise ValueError("Solo un administrador puede gestionar cursos")
-        return administrador.gestionar_cursos(accion, curso)
+        resultado = administrador.gestionar_cursos(accion, curso)
+        if self._db_activa:
+            self._persistencia.actualizar_curso(curso)
+        return resultado
 
     def actualizar_usuario(self, usuario, correo=None, telefono=None):
         if correo is not None:
             usuario.correo = correo.strip()
         if telefono is not None:
             usuario.telefono = telefono.strip()
+        if self._db_activa:
+            self._persistencia.actualizar_usuario(usuario)
         return usuario
 
     def probar_conexion_db(self):
@@ -123,35 +139,32 @@ class SistemaNivelacion:
             return False, "No se pudo establecer la conexion. Configure .streamlit/secrets.toml o SQL Server."
         except Exception as error:
             return False, f"Error de conexion: {error}"
-    # Guarda todos los usuarios registrados en SQL Server.
-    def guardar_usuarios_en_db(self):
-        try:
-            # Establece la conexión con la base de datos.
-            self.db.conectar()
-            
-            # Consulta SQL para insertar usuarios.
-            query = "INSERT INTO usuarios (id, nombres, apellidos) VALUES (%s, %s, %s)"
-            # Recorre todos los usuarios registrados.
-            for id_usuario, usuario in self.usuarios.items():
-                # Crea una tupla con los datos que se insertarán.
-                valores = (id_usuario, usuario.nombres, usuario.apellidos)
-                 # Ejecuta la consulta SQL.
-                self.db.cursor.execute(query, valores)
-                
-             # Guarda definitivamente los cambios.
-            self.db.conn.commit()  
-            # Mensaje de éxito.
-            print(f"Se guardaron {len(self.usuarios)} usuarios exitosamente.")
-         # Captura cualquier error.
-        except Exception as e:
-            print(f"Error al guardar en la base de datos: {e}")
-        # Cierra siempre la conexión.
-        finally:
-            self.db.cerrar()  
+
+    def cargar_desde_db(self):
+        ok, mensaje = self._persistencia.cargar(self)
+        self._db_activa = ok
+        return ok, mensaje
+
+    def buscar_usuario_por_identificador(self, identificador):
+        identificador = identificador.strip()
+        identificador_lower = identificador.lower()
+        for usuario in self.usuarios.values():
+            if usuario.cedula == identificador:
+                return usuario
+            if usuario.correo.lower() == identificador_lower:
+                return usuario
+        return None
+
+    def _siguiente_id(self, diccionario, tabla=None, columna=None):
+        if self._db_activa and tabla and columna:
+            nuevo_id = self._persistencia.siguiente_id(tabla, columna)
+            if nuevo_id:
+                return nuevo_id
+        return len(diccionario) + 1
     # Registra un nuevo usuario.
     def registrar_usuario(self, tipo_usuario, cedula, nombres, apellidos, correo, contrasena, telefono, **datos):
         # Genera un ID automático.
-        id_usuario = len(self.usuarios) + 1
+        id_usuario = self._siguiente_id(self.usuarios, "Usuario", "id_usuario")
         # Si es un docente.
         if tipo_usuario == "Docente":
             usuario = self.fabrica.crear_usuario(
@@ -203,27 +216,30 @@ class SistemaNivelacion:
             raise ValueError("Tipo de usuario no valido")
          # Guarda el usuario en el diccionario.
         self.usuarios[id_usuario] = usuario
-        # Devuelve el objeto creado.
+        if self._db_activa:
+            self._persistencia.guardar_usuario(usuario, tipo_usuario, datos)
         return usuario
     # Registra un aula.
     def registrar_aula(self, codigo, nombre, capacidad, piso, edificio):
         # Genera un ID.
-        id_aula = len(self.aulas) + 1
-        # Crea el aula.
+        id_aula = self._siguiente_id(self.aulas, "Aula", "id_aula")
         aula = Aula(id_aula, codigo, nombre, int(capacidad), int(piso), edificio)
-        # Guarda el aula.
         self.aulas[id_aula] = aula
+        if self._db_activa:
+            self._persistencia.guardar_aula(aula)
         return aula
      # Registra un horario.
     def registrar_horario(self, dia, hora_inicio, hora_fin, modalidad, grupo, aula):
          # Genera un ID.
-        id_horario = len(self.horarios) + 1
+        id_horario = self._siguiente_id(self.horarios, "Horario", "id_horario")
         horario = Horario(id_horario, dia, hora_inicio, hora_fin, modalidad, grupo, aula)
         self.horarios[id_horario] = horario
+        if self._db_activa:
+            self._persistencia.guardar_horario(horario)
         return horario
      # Registra un curso.
     def registrar_curso(self, codigo, nombre, nivel, paralelo, cupo_maximo, docente, horario, aula):
-        id_curso = len(self.cursos) + 1
+        id_curso = self._siguiente_id(self.cursos, "CursoNivelacion", "id_curso")
         curso = CursoNivelacion(
             id_curso,
             codigo,
@@ -236,6 +252,8 @@ class SistemaNivelacion:
             aula,
         )
         self.cursos[id_curso] = curso
+        if self._db_activa:
+            self._persistencia.guardar_curso(curso)
         return curso
     def inscribir_estudiante(self, curso, estudiante, periodo=None, tipo_matricula="Regular", fecha=None):
         if estudiante in curso.lista_estudiantes:
@@ -253,7 +271,7 @@ class SistemaNivelacion:
             raise ValueError("No se puede matricular: el periodo esta cerrado")
 
         fecha_matricula = fecha or date.today().isoformat()
-        id_matricula = len(self.matriculas) + 1
+        id_matricula = self._siguiente_id(self.matriculas, "Matricula", "id_matricula")
         facade = MatriculaFacade(periodo_obj, curso, estudiante)
         if not facade.matricular(id_matricula, fecha_matricula, tipo_matricula):
             raise ValueError("No se pudo completar la matricula")
@@ -261,6 +279,8 @@ class SistemaNivelacion:
         matricula = estudiante.matricula
         self.matriculas[id_matricula] = matricula
         estudiante.estado_nivelacion = "En Curso"
+        if self._db_activa:
+            self._persistencia.guardar_matricula(self, matricula, estudiante, curso, periodo_obj)
         return matricula
     def registrar_carga_academica(self, estudiante, periodo=None):
         cursos_estudiante = self.obtener_cursos_estudiante(estudiante)
@@ -277,9 +297,11 @@ class SistemaNivelacion:
                 raise ValueError("El estudiante ya tiene una carga academica registrada en ese periodo")
 
         total_creditos = total_asignaturas * self.CREDITOS_POR_CURSO
-        id_carga = len(self.cargas_academicas) + 1
+        id_carga = self._siguiente_id(self.cargas_academicas, "CargaAcademica", "id_carga")
         carga = CargaAcademica(id_carga, estudiante, periodo_nombre, total_asignaturas, total_creditos)
         self.cargas_academicas[id_carga] = carga
+        if self._db_activa:
+            self._persistencia.guardar_carga(self, carga)
         return carga
     # Obtiene los cursos donde está inscrito un estudiante.
     def obtener_cursos_estudiante(self, estudiante):
@@ -297,7 +319,7 @@ class SistemaNivelacion:
             if registro["estudiante"] == estudiante and registro["curso"] == curso:
                 raise ValueError("Ya existe una calificacion registrada para este estudiante en el curso")
 
-        id_calificacion = len(self.calificaciones) + 1
+        id_calificacion = self._siguiente_id(self.calificaciones, "Calificacion", "id_calificacion")
         calificacion = Calificacion(id_calificacion, float(parcial1), float(parcial2))
         calificacion.calcular_promedio()
         calificacion.publicar_calificacion()
@@ -317,6 +339,8 @@ class SistemaNivelacion:
             "periodo": self.periodo_actual,
         }
         self.calificaciones[id_calificacion] = registro
+        if self._db_activa:
+            self._persistencia.guardar_calificacion(registro)
         return calificacion
 
     def registrar_asistencia(self, docente, curso, estudiante, fecha, estado, observacion=""):
@@ -325,7 +349,7 @@ class SistemaNivelacion:
         if estudiante not in curso.lista_estudiantes:
             raise ValueError("El estudiante no esta inscrito en este curso")
 
-        id_asistencia = len(self.asistencias) + 1
+        id_asistencia = self._siguiente_id(self.asistencias, "Asistencia", "id_asistencia")
         asistencia = Asistencia(id_asistencia, fecha, estado, observacion)
         asistencia.anotar_asistencia(estado, observacion)
         docente.registrar_asistencia(fecha, estado, estudiante.id_usuario)
@@ -337,6 +361,8 @@ class SistemaNivelacion:
             "periodo": self.periodo_actual,
         }
         self.asistencias[id_asistencia] = registro
+        if self._db_activa:
+            self._persistencia.guardar_asistencia(registro)
         return asistencia
 
     def obtener_calificaciones_estudiante(self, estudiante, periodo=None):
@@ -404,7 +430,7 @@ class SistemaNivelacion:
         exportador = ExportarExcel() if formato == "Excel" else ExportarPDF()
         fecha_generacion = date.today().isoformat()
 
-        id_reporte = len(self.reportes) + 1
+        id_reporte = self._siguiente_id(self.reportes, "Reporte", "id_reporte")
         reporte = Reporte(
             id_reporte,
             tipo_reporte,
@@ -414,6 +440,8 @@ class SistemaNivelacion:
             exportador,
         )
         self.reportes[id_reporte] = reporte
+        if self._db_activa:
+            self._persistencia.guardar_reporte(self, reporte)
         return reporte
     # Devuelve todos los docentes.
     def listar_docentes(self):

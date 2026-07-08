@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <circle cx="60" cy="60" r="56" fill="#1A1A1A" stroke="#CE1126" stroke-width="4"/>
+  <text x="60" y="55" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="#009639">ULEAM</text>
+  <text x="60" y="75" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="8" fill="#FFFFFF">Manabi</text>
+</svg>

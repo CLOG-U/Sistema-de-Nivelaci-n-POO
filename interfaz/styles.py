@@ -165,6 +165,14 @@ def aplicar_estilos():
                 margin-bottom:12px;
                 color:{COLOR_NEGRO_SUAVE} !important;
             }}
+            .login-card {{
+                background:{COLOR_BLANCO};
+                border:1px solid #dddddd;
+                border-top:4px solid {COLOR_ROJO};
+                border-radius:12px;
+                padding:24px 20px;
+                box-shadow:0 4px 12px rgba(26,26,26,0.1);
+            }}
         </style>
         """,
         unsafe_allow_html=True,

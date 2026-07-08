@@ -1,6 +1,9 @@
 import streamlit as st
 
-from interfaz.branding import NOMBRE_SISTEMA
+from interfaz.branding import NOMBRE_SISTEMA, mostrar_logo_login, UNIVERSIDAD, SIGLAS
+from modelos.admin import Administrador
+from modelos.docente import Docente
+from modelos.estudiante import Estudiante
 
 ROLES = {
     "Administrador": {
@@ -33,6 +36,7 @@ def inicializar_sesion():
 def cerrar_sesion():
     st.session_state.rol_actual = None
     st.session_state.usuario_actual_id = None
+    st.session_state.nav_seleccion = None
     st.rerun()
 
 
@@ -58,48 +62,80 @@ def usuarios_por_rol(sistema, rol):
         return sistema.listar_docentes()
 
     if rol == "Administrador":
-        from modelos.admin import Administrador
-
         return [u for u in sistema.usuarios.values() if isinstance(u, Administrador)]
 
     return []
 
 
+def _rol_desde_usuario(usuario):
+    if isinstance(usuario, Administrador):
+        return "Administrador"
+    if isinstance(usuario, Docente):
+        return "Docente"
+    if isinstance(usuario, Estudiante):
+        return "Estudiante"
+    return None
+
+
+def autenticar_usuario(sistema, identificador, contrasena):
+    usuario = sistema.buscar_usuario_por_identificador(identificador)
+    if not usuario:
+        return False, "Usuario no encontrado. Verifique cedula o correo institucional."
+
+    if not usuario.iniciar_sesion(contrasena):
+        return False, "Contrasena incorrecta o usuario inactivo."
+
+    rol = _rol_desde_usuario(usuario)
+    if not rol:
+        return False, "Tipo de usuario no reconocido en el sistema."
+
+    st.session_state.rol_actual = rol
+    st.session_state.usuario_actual_id = usuario.id_usuario
+    st.session_state.nav_seleccion = None
+    return True, f"Bienvenido, {usuario.nombres} {usuario.apellidos}"
+
+
+def pantalla_login(sistema):
+    col_izq, col_centro, col_der = st.columns([1, 2, 1])
+
+    with col_centro:
+        mostrar_logo_login()
+        st.markdown(f"## {NOMBRE_SISTEMA}")
+        st.markdown(f"**{SIGLAS}** · {UNIVERSIDAD}")
+        st.caption("Ingrese con su cedula o correo institucional (@uleam.edu.ec).")
+
+        with st.form("form_login", clear_on_submit=False):
+            identificador = st.text_input(
+                "Cedula o correo",
+                placeholder="1300002222 o usuario@uleam.edu.ec",
+            )
+            contrasena = st.text_input("Contrasena", type="password")
+            enviar = st.form_submit_button("Iniciar sesion", use_container_width=True)
+
+            if enviar:
+                if not identificador.strip() or not contrasena:
+                    st.error("Complete cedula/correo y contrasena.")
+                else:
+                    ok, mensaje = autenticar_usuario(sistema, identificador, contrasena)
+                    if ok:
+                        st.success(mensaje)
+                        st.rerun()
+                    else:
+                        st.error(mensaje)
+
+        with st.expander("Credenciales de prueba (POOPROYECTO.sql)"):
+            st.markdown(
+                """
+                | Rol | Cedula | Contrasena |
+                |-----|--------|------------|
+                | Administrador | 1300004444 | adm123 |
+                | Docente | 1300001111 | doc123 |
+                | Estudiante | 1300002222 | est123 |
+                | Estudiante | 1300003333 | est456 |
+                """
+            )
+
+
 def pantalla_seleccion_rol(sistema):
-    st.markdown(f"## {NOMBRE_SISTEMA}")
-    st.markdown("### Seleccione el tipo de perfil para ingresar a una experiencia personalizada.")
-    st.caption("Esta version utiliza perfiles demo para representar el acceso por roles.")
-
-    st.info(
-        "El sistema utiliza una interfaz diferenciada por roles, permitiendo que administradores, "
-        "docentes y estudiantes accedan unicamente a las funciones correspondientes a su perfil."
-    )
-
-    st.markdown("---")
-
-    for rol, info in ROLES.items():
-        with st.container(border=True):
-            icono_col, texto_col, boton_col = st.columns([2, 5, 2])
-
-            with icono_col:
-                st.markdown(
-                    f"<div class='role-icon-wrap'><span class='role-icon'>{info['icono']}</span></div>",
-                    unsafe_allow_html=True,
-                )
-
-            with texto_col:
-                st.markdown(f"### {rol}")
-                st.markdown(f"<p class='role-desc'>{info['descripcion']}</p>", unsafe_allow_html=True)
-
-            with boton_col:
-                st.markdown("<div style='padding-top:12px;'></div>", unsafe_allow_html=True)
-                if st.button(f"Entrar", key=f"btn_{rol}", use_container_width=True):
-                    st.session_state.rol_actual = rol
-
-                    usuarios = usuarios_por_rol(sistema, rol)
-                    if usuarios:
-                        st.session_state.usuario_actual_id = usuarios[0].id_usuario
-
-                    st.rerun()
-
-        st.markdown("")
+    """Mantiene compatibilidad; redirige al login real."""
+    pantalla_login(sistema)

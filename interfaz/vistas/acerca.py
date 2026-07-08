@@ -14,7 +14,7 @@ def mostrar_acerca(sistema):
     encabezado_pagina("Acerca del sistema", periodo=sistema.periodo_actual)
 
     ok_db, mensaje_db = sistema.probar_conexion_db()
-    estado_db = "Conectada" if ok_db else "No disponible (modo en memoria)"
+    estado_db = "Conectada" if ok_db else "No disponible"
 
     st.markdown(
         f"""
@@ -25,6 +25,8 @@ def mostrar_acerca(sistema):
 
         - **Asignatura:** {MODULO_POO}
         - **Periodo academico activo:** {sistema.periodo_actual}
+        - **Persistencia:** SQL Server (PROYECTOPOO)
+        - **Autenticacion:** Login por cedula/correo y contrasena
         - **Tecnologia:** Python, POO y Streamlit
         - **Correos institucionales:** dominio `@uleam.edu.ec`
 
@@ -41,13 +43,13 @@ def mostrar_acerca(sistema):
 
         ### Acceso por roles
 
-        El sistema utiliza una interfaz diferenciada por roles, permitiendo que
-        administradores, docentes y estudiantes accedan unicamente a las funciones
-        correspondientes a su perfil.
+        El sistema utiliza login con autenticacion real. El rol (Administrador,
+        Docente o Estudiante) se determina automaticamente segun el tipo de usuario
+        registrado en la base de datos.
         """
     )
 
-    st.info(f"Institucion: {UNIVERSIDAD} ({SIGLAS})")
+    st.info(f"Institucion: {UNIVERSIDAD} ({SIGLAS}) · BD: **{estado_db}**")
 
     st.markdown("### Estado de persistencia (BD-01 / BD-02 / BD-03)")
     if ok_db:

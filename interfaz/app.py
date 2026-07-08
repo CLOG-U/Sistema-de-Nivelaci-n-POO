@@ -12,10 +12,9 @@ from interfaz.auth import (
     inicializar_sesion,
     obtener_rol_actual,
     obtener_usuario_actual,
-    pantalla_seleccion_rol,
-    usuarios_por_rol,
+    pantalla_login,
 )
-from interfaz.branding import TITULO_APP, encabezado_sidebar
+from interfaz.branding import TITULO_APP, encabezado_sidebar, mostrar_logo_sidebar, RUTA_LOGO
 from interfaz.navigation import obtener_opciones_por_rol
 from interfaz.vistas.acerca import mostrar_acerca
 from interfaz.vistas.aulas import mostrar_aulas
@@ -57,38 +56,11 @@ RUTAS = {
 }
 
 
-def _selector_usuario_sidebar(sistema, rol):
-    usuarios = usuarios_por_rol(sistema, rol)
-
-    if not usuarios:
-        st.sidebar.warning("No hay usuarios demo para este rol.")
-        return
-
-    opciones = {
-        f"{u.nombres} {u.apellidos} · {u.cedula}": u.id_usuario for u in usuarios
-    }
-
-    usuario_actual_id = st.session_state.get("usuario_actual_id")
-    valores = list(opciones.values())
-
-    if usuario_actual_id not in valores:
-        st.session_state.usuario_actual_id = valores[0]
-
-    indice_actual = valores.index(st.session_state.usuario_actual_id)
-
-    seleccionado = st.sidebar.selectbox(
-        "Usuario demo",
-        list(opciones.keys()),
-        index=indice_actual,
-    )
-
-    st.session_state.usuario_actual_id = opciones[seleccionado]
-
-
 def main():
+    page_icon = str(RUTA_LOGO) if RUTA_LOGO.exists() else "🎓"
     st.set_page_config(
         page_title=TITULO_APP,
-        page_icon="🎓",
+        page_icon=page_icon,
         layout="wide",
     )
 
@@ -99,14 +71,22 @@ def main():
     inicializar_sesion()
 
     sistema = get_sistema()
-    rol = obtener_rol_actual()
-
-    if not rol:
-        st.sidebar.markdown(encabezado_sidebar(), unsafe_allow_html=True)
-        pantalla_seleccion_rol(sistema)
+    if sistema is None:
+        st.error("No se pudo conectar a la base de datos SQL Server.")
+        st.warning(st.session_state.get("db_mensaje", "Configure .streamlit/secrets.toml y ejecute POOPROYECTO.sql."))
         pie_pagina()
         return
 
+    rol = obtener_rol_actual()
+
+    if not rol:
+        mostrar_logo_sidebar()
+        st.sidebar.markdown(encabezado_sidebar(), unsafe_allow_html=True)
+        pantalla_login(sistema)
+        pie_pagina()
+        return
+
+    mostrar_logo_sidebar()
     st.sidebar.markdown(encabezado_sidebar(), unsafe_allow_html=True)
     st.sidebar.markdown("---")
     st.sidebar.caption("Sesion actual")
@@ -115,13 +95,12 @@ def main():
         unsafe_allow_html=True,
     )
 
-    _selector_usuario_sidebar(sistema, rol)
     usuario = obtener_usuario_actual(sistema)
 
     if usuario:
         st.sidebar.info(f"{usuario.nombres} {usuario.apellidos}")
 
-    if st.sidebar.button("Cambiar perfil", use_container_width=True):
+    if st.sidebar.button("Cerrar sesion", use_container_width=True):
         cerrar_sesion()
 
     st.sidebar.markdown("---")
