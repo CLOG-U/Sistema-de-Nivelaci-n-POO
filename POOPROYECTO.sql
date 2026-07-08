@@ -51,3 +51,14 @@ CREATE TABLE Estudiante(
     FOREIGN KEY(id_usuario)
         REFERENCES Usuario(id_usuario)
 );
+
+CREATE TABLE Carrera(
+    id_carrera INT PRIMARY KEY,
+    codigo VARCHAR(20),
+    nombre VARCHAR(120),
+    estado BIT,
+    id_facultad INT NOT NULL,
+
+    FOREIGN KEY(id_facultad)
+        REFERENCES Facultad(id_facultad)
+);
