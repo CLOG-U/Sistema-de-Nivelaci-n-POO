@@ -1,12 +1,12 @@
-import streamlit as st
+import streamlit as st  # Importa Streamlit para la interfaz.
 
-from interfaz.branding import encabezado_pagina
-from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
-from interfaz.components.tables import aula_con_uso_dict
+from interfaz.branding import encabezado_pagina  # Encabezado de la página.
+from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio  # Componentes de diseño.
+from interfaz.components.tables import aula_con_uso_dict  # Convierte aulas en filas de tabla.
 
 
 def _cursos_por_aula(sistema, aula):
-    return sum(1 for curso in sistema.cursos.values() if curso.aula == aula)
+    return sum(1 for curso in sistema.cursos.values() if curso.aula == aula)  # Cuenta los cursos asignados a un aula.
 
 
 def _formulario_aula(sistema):
@@ -19,7 +19,7 @@ def _formulario_aula(sistema):
         enviado = st.form_submit_button("Registrar aula", use_container_width=True)
 
     if enviado:
-        try:
+        try:  # Valida campos obligatorios.
             if not all([codigo, nombre, edificio]):
                 raise ValueError("Complete todos los campos obligatorios")
 
@@ -35,13 +35,13 @@ def _formulario_aula(sistema):
             st.error(str(error))
 
 
-def _resumen_aulas(sistema):
+def _resumen_aulas(sistema): # Muestra el resumen de aulas.
     intro_modulo("Administracion de aulas, capacidad y espacios asignados a cursos.", "🏫")
     aulas = list(sistema.aulas.values())
     capacidad_total = sum(aula.capacidad for aula in aulas)
     en_uso = sum(1 for aula in aulas if _cursos_por_aula(sistema, aula) > 0)
 
-    fila_metricas(
+    fila_metricas(  # Muestra métricas principales.
         [
             ("Total aulas", len(aulas)),
             ("Capacidad total", capacidad_total),
@@ -64,14 +64,14 @@ def _consulta_aulas(sistema):
     if filtro_edificio != "Todos":
         aulas = [a for a in aulas if a.edificio == filtro_edificio]
 
-    filas = [
+    filas = [  # Genera filas para la tabla.
         aula_con_uso_dict(aula, _cursos_por_aula(sistema, aula)) for aula in aulas
     ]
     if not tabla_o_vacio(filas, "No hay aulas con ese filtro."):
         return
 
     for aula in aulas:
-        detalle_entidad(
+        detalle_entidad( # Muestra detalles de cada aula.
             f"{aula.codigo} · {aula.nombre}",
             [
                 ("Capacidad", aula.capacidad),
@@ -87,7 +87,7 @@ def mostrar_aulas(sistema):
     encabezado_pagina("Gestion de aulas")
 
     tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
-
+# Crea pestañas.
     with tab_resumen:
         _resumen_aulas(sistema)
 
