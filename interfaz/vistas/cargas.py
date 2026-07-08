@@ -5,8 +5,8 @@ from interfaz.components.layout import detalle_entidad, fila_metricas, intro_mod
 from interfaz.components.tables import carga_to_dict, periodo_to_dict
 
 
-def _formulario_carga(sistema):
-    estudiantes = sistema.listar_estudiantes()
+def _formulario_carga(sistema): 
+    estudiantes = sistema.listar_estudiantes()   # Formulario para generar una carga académica.
     if not estudiantes:
         st.warning("No hay estudiantes registrados.")
         return
@@ -16,7 +16,7 @@ def _formulario_carga(sistema):
         st.warning("No hay periodos academicos abiertos.")
         return
 
-    opciones_estudiantes = {f"{e.cedula} - {e.nombres} {e.apellidos}": e for e in estudiantes}
+    opciones_estudiantes = {f"{e.cedula} - {e.nombres} {e.apellidos}": e for e in estudiantes} # Opciones para los selectores.
     opciones_periodos = {f"{p.nombre} ({p.estado})": p.nombre for p in periodos_abiertos}
 
     with st.form("form_carga"):
@@ -26,7 +26,7 @@ def _formulario_carga(sistema):
 
     if enviado:
         try:
-            estudiante = opciones_estudiantes[estudiante_etiqueta]
+            estudiante = opciones_estudiantes[estudiante_etiqueta] # Genera la carga académica.
             periodo = opciones_periodos[periodo_etiqueta]
             carga = sistema.registrar_carga_academica(estudiante, periodo=periodo)
             st.success(
@@ -36,10 +36,10 @@ def _formulario_carga(sistema):
                 f"Creditos: {carga.total_creditos}."
             )
         except Exception as error:
-            st.error(str(error))
+            st.error(str(error)) # Muestra el error.
 
 
-def _formulario_periodo(sistema):
+def _formulario_periodo(sistema): # Formulario para registrar un periodo académico.
     with st.form("form_periodo_cargas"):
         nombre = st.text_input("Nombre del periodo", placeholder="2026-2")
         fecha_inicio = st.text_input("Fecha inicio (AAAA-MM-DD)", value="2026-07-01")
@@ -49,7 +49,7 @@ def _formulario_periodo(sistema):
 
     if enviado:
         try:
-            periodo = sistema.registrar_periodo(
+            periodo = sistema.registrar_periodo( # Registra el periodo.
                 nombre.strip(),
                 fecha_inicio.strip(),
                 fecha_fin.strip(),
@@ -57,17 +57,17 @@ def _formulario_periodo(sistema):
             )
             st.success(f"Periodo {periodo.nombre} registrado con estado {periodo.estado}")
         except Exception as error:
-            st.error(str(error))
+            st.error(str(error))  # Muestra el error.
 
 
-def _resumen_cargas(sistema):
+def _resumen_cargas(sistema): # Muestra el resumen de cargas académicas.
     intro_modulo("Generacion y seguimiento de cargas academicas por periodo academico.", "📑")
     cargas = list(sistema.cargas_academicas.values())
     creditos = sum(c.total_creditos for c in cargas)
     asignaturas = sum(c.total_asignaturas for c in cargas)
     estudiantes_con_carga = len({c.estudiante.id_usuario for c in cargas})
 
-    fila_metricas(
+    fila_metricas( # Muestra métricas.
         [
             ("Cargas registradas", len(cargas)),
             ("Estudiantes con carga", estudiantes_con_carga),
@@ -81,7 +81,7 @@ def _resumen_cargas(sistema):
         st.markdown("#### Periodos disponibles")
         tabla_o_vacio([periodo_to_dict(p) for p in periodos], "Sin periodos.")
 
-
+# Consulta las cargas académicas.
 def _consulta_cargas(sistema):
     cargas = list(sistema.cargas_academicas.values())
     if not cargas:
