@@ -156,3 +156,10 @@ CREATE TABLE DetalleAsistencia(
     FOREIGN KEY(id_asistencia)
         REFERENCES Asistencia(id_asistencia)
 );
+
+CREATE TABLE Calificacion(
+    id_calificacion INT PRIMARY KEY,
+    nota_parcial1 DECIMAL(5,2),
+    nota_parcial2 DECIMAL(5,2),
+    estado VARCHAR(30)
+);
