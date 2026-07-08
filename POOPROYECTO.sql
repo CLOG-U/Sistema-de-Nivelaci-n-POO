@@ -163,3 +163,16 @@ CREATE TABLE Calificacion(
     nota_parcial2 DECIMAL(5,2),
     estado VARCHAR(30)
 );
+
+CREATE TABLE DetalleCalificacion(
+    id_detalle INT PRIMARY KEY,
+    id_calificacion INT NOT NULL,
+    tipo_evaluacion VARCHAR(50),
+    descripcion VARCHAR(255),
+    puntaje_obtenido DECIMAL(5,2),
+    puntaje_total DECIMAL(5,2),
+    fecha_evaluacion DATE,
+
+    FOREIGN KEY(id_calificacion)
+        REFERENCES Calificacion(id_calificacion)
+);
