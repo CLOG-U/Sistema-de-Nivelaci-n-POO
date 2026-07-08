@@ -1,9 +1,11 @@
 from modelos.usuario import Usuario
+
+
+class Docente(Usuario):
     """
     Clase que representa a un docente en el sistema.
     Hereda de Usuario y gestiona notas, asistencia y reportes.
     """
-class Docente(Usuario):                           #se inicializan los atributos heredados y propios
     def __init__(self, id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono, titulo_profesional, especialidad):
         super().__init__(id_usuario, cedula, nombres, apellidos, correo, contraseña, telefono) 
         self.__titulo_profesional = titulo_profesional
@@ -53,15 +55,11 @@ class Docente(Usuario):                           #se inicializan los atributos 
             nota["fecha"] = kwargs["fecha"]
         self.__notas_registradas.append(nota)
         print("Nota registrada para el estudiante " + str(id_estudiante) + " nota final: " + str(nota_final))
-#sobrecarga simulada con args
-     """
-        Registra asistencia de múltiples estudiantes.  
-        Args:
-            fecha (str): Fecha de asistencia
-            estado (str): presente, ausente, justificado, tardanza
-            *args: IDs de estudiantes
-        """
+
     def registrar_asistencia(self, fecha, estado, *args):
+        """
+        Registra asistencia de multiples estudiantes.
+        """
         for id_estudiante in args: #recorre cada estudiante enviado en args
             print("Asistencia registrada para el estudiante " + str(id_estudiante) + " el " + fecha + " estado: " + estado)
 
@@ -87,11 +85,9 @@ class Docente(Usuario):                           #se inicializan los atributos 
         else:
             print("Contraseña incorrecta o usuario inactivo")
             return False
-        """
-        Sobrescribe método de Usuario (polimorfismo).
-        Muestra información completa del docente.
-        """
+
     def mostrar_info(self):
+        """Sobrescribe metodo de Usuario (polimorfismo)."""
         print("Docente: " + self.nombres + " " + self.apellidos)
         print("Cedula: " + self.cedula)
         print("Titulo profesional: " + self.__titulo_profesional)
