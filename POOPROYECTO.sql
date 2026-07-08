@@ -121,3 +121,20 @@ CREATE TABLE Matricula(
     FOREIGN KEY(id_periodo)
         REFERENCES PeriodoAcademico(id_periodo)
 );
+
+CREATE TABLE CargaAcademica(
+    id_carga INT PRIMARY KEY,
+
+    id_estudiante INT NOT NULL,
+    id_periodo INT NOT NULL,
+
+    total_asignaturas INT,
+    total_creditos INT,
+    estado BIT,
+
+    FOREIGN KEY(id_estudiante)
+        REFERENCES Estudiante(id_usuario),
+
+    FOREIGN KEY(id_periodo)
+        REFERENCES PeriodoAcademico(id_periodo)
+);
