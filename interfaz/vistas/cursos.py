@@ -1,8 +1,10 @@
 import streamlit as st
 
+from interfaz.auth import obtener_usuario_actual
 from interfaz.branding import encabezado_pagina
 from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
 from interfaz.components.tables import curso_detalle_dict, usuario_to_dict
+from modelos.admin import Administrador
 
 
 def _formulario_curso(sistema):
@@ -103,10 +105,41 @@ def _consulta_cursos(sistema):
                 st.info("Sin estudiantes inscritos.")
 
 
-def mostrar_cursos(sistema):
-    encabezado_pagina("Gestion de cursos de nivelacion")
+def _gestionar_cursos(sistema):
+    admin = obtener_usuario_actual(sistema)
+    if not isinstance(admin, Administrador):
+        st.warning("Seleccione un administrador demo para gestionar cursos.")
+        return
 
-    tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
+    cursos = list(sistema.cursos.values())
+    if not cursos:
+        st.warning("No hay cursos registrados.")
+        return
+
+    opciones = {
+        f"{c.codigo} - {c.nombre} ({'Abierto' if c.estado else 'Cerrado'})": c for c in cursos
+    }
+
+    with st.form("form_gestion_curso"):
+        curso_etiqueta = st.selectbox("Curso", list(opciones.keys()))
+        accion = st.selectbox("Accion", ["abrir", "cerrar"])
+        enviado = st.form_submit_button("Aplicar accion", use_container_width=True)
+
+    if enviado:
+        try:
+            curso = opciones[curso_etiqueta]
+            mensaje = sistema.gestionar_curso(admin, accion, curso)
+            st.success(mensaje)
+        except Exception as error:
+            st.error(str(error))
+
+
+def mostrar_cursos(sistema):
+    encabezado_pagina("Gestion de cursos de nivelacion", periodo=sistema.periodo_actual)
+
+    tab_resumen, tab_registrar, tab_consulta, tab_gestionar = st.tabs(
+        ["Resumen", "Registrar", "Consulta", "Gestionar"]
+    )
 
     with tab_resumen:
         _resumen_cursos(sistema)
@@ -117,3 +150,7 @@ def mostrar_cursos(sistema):
 
     with tab_consulta:
         _consulta_cursos(sistema)
+
+    with tab_gestionar:
+        intro_modulo("Abra o cierre cursos con Administrador.gestionar_cursos().", "⚙️")
+        _gestionar_cursos(sistema)

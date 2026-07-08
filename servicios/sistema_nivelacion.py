@@ -1,16 +1,20 @@
-from datetime import date  
+from datetime import date
+
+from modelos.admin import Administrador
+from modelos.asistencia import Asistencia
 from modelos.aula import Aula
+from modelos.calificacion import Calificacion
 from modelos.carga_academica import CargaAcademica
 from modelos.curso_nivelacion import CursoNivelacion
-from modelos.horario import Horario
-from modelos.iexportable import ExportarExcel, ExportarPDF
-from modelos.reporte import Reporte
-from modelos.admin import Administrador
 from modelos.docente import Docente
 from modelos.estudiante import Estudiante
+from modelos.horario import Horario
+from modelos.iexportable import ExportarExcel, ExportarPDF
+from modelos.periodo_academico import PeriodoAcademico
+from modelos.reporte import Reporte
+from servicios.BaseD import ConexionDB
 from servicios.fabrica import FabricaUsuario
-from datetime import date
-from servicios.BaseD import ConexionDB  # <--- Aquí importamos tu clase de base de datos
+from servicios.matricula_facade import MatriculaFacade
 # Clase principal del Sistema de Nivelación
 class SistemaNivelacion:
     # Constante que representa los créditos asignados a cada curso.
@@ -19,20 +23,106 @@ class SistemaNivelacion:
     def __init__(self):
         # Crea la fábrica de usuarios.
         self.fabrica = FabricaUsuario()
-        # Define el período académico actual.
+        self.periodos = {}
+        self.matriculas = {}
+        self.calificaciones = {}
+        self.asistencias = {}
         self.periodo_actual = "2026-1"
-        # Lista de períodos disponibles.
-        self.periodos_disponibles = [self.periodo_actual] 
-        
-        # Crea el objeto de conexión con la base de datos.
+        self.periodos_disponibles = [self.periodo_actual]
+        self._inicializar_periodos()
+
         self.db = ConexionDB()
-        # Diccionarios donde se almacenan los datos del sistema.
         self.usuarios = {}
         self.aulas = {}
         self.horarios = {}
         self.cursos = {}
         self.cargas_academicas = {}
         self.reportes = {}
+
+    def _inicializar_periodos(self):
+        if self.periodos:
+            return
+        periodo1 = PeriodoAcademico(1, "2026-1", "2026-01-01", "2026-06-30", "Abierto")
+        periodo2 = PeriodoAcademico(2, "2026-2", "2026-07-01", "2026-12-15", "Cerrado")
+        self.periodos[periodo1.id_periodo] = periodo1
+        self.periodos[periodo2.id_periodo] = periodo2
+        self._sincronizar_periodos_disponibles()
+        self.periodo_actual = periodo1.nombre
+
+    def _sincronizar_periodos_disponibles(self):
+        self.periodos_disponibles = [periodo.nombre for periodo in self.periodos.values()]
+
+    def registrar_periodo(self, nombre, fecha_inicio, fecha_fin, estado="Abierto"):
+        if self.obtener_periodo(nombre):
+            raise ValueError("Ya existe un periodo con ese nombre")
+        id_periodo = len(self.periodos) + 1
+        periodo = PeriodoAcademico(id_periodo, nombre, fecha_inicio, fecha_fin, estado)
+        self.periodos[id_periodo] = periodo
+        self._sincronizar_periodos_disponibles()
+        return periodo
+
+    def establecer_periodo_actual(self, nombre_periodo):
+        periodo = self.obtener_periodo(nombre_periodo)
+        if not periodo:
+            raise ValueError("Periodo academico no valido")
+        self.periodo_actual = periodo.nombre
+        return periodo
+
+    def abrir_periodo(self, nombre_periodo):
+        periodo = self.obtener_periodo(nombre_periodo)
+        if not periodo:
+            raise ValueError("Periodo academico no valido")
+        periodo.abrir_periodo()
+        return periodo
+
+    def cerrar_periodo(self, nombre_periodo):
+        periodo = self.obtener_periodo(nombre_periodo)
+        if not periodo:
+            raise ValueError("Periodo academico no valido")
+        periodo.cerrar_periodo()
+        return periodo
+
+    def obtener_periodo(self, nombre_o_id):
+        for periodo in self.periodos.values():
+            if periodo.nombre == nombre_o_id or periodo.id_periodo == nombre_o_id:
+                return periodo
+        return None
+
+    def obtener_periodo_actual(self):
+        return self.obtener_periodo(self.periodo_actual)
+
+    def listar_periodos_academicos(self):
+        return list(self.periodos.values())
+
+    def listar_periodos_abiertos(self):
+        return [periodo for periodo in self.periodos.values() if periodo.estado == "Abierto"]
+
+    def gestionar_usuario(self, administrador, accion, usuario, motivo=None, fecha=None):
+        if not isinstance(administrador, Administrador):
+            raise ValueError("Solo un administrador puede gestionar usuarios")
+        return administrador.gestionar_usuario(accion, usuario, motivo, fecha)
+
+    def gestionar_curso(self, administrador, accion, curso):
+        if not isinstance(administrador, Administrador):
+            raise ValueError("Solo un administrador puede gestionar cursos")
+        return administrador.gestionar_cursos(accion, curso)
+
+    def actualizar_usuario(self, usuario, correo=None, telefono=None):
+        if correo is not None:
+            usuario.correo = correo.strip()
+        if telefono is not None:
+            usuario.telefono = telefono.strip()
+        return usuario
+
+    def probar_conexion_db(self):
+        try:
+            conexion = self.db.conectar()
+            if conexion:
+                self.db.cerrar()
+                return True, "Conexion a SQL Server establecida correctamente."
+            return False, "No se pudo establecer la conexion. Configure .streamlit/secrets.toml o SQL Server."
+        except Exception as error:
+            return False, f"Error de conexion: {error}"
     # Guarda todos los usuarios registrados en SQL Server.
     def guardar_usuarios_en_db(self):
         try:
@@ -147,60 +237,182 @@ class SistemaNivelacion:
         )
         self.cursos[id_curso] = curso
         return curso
-    # Inscribe un estudiante en un curso.
-    def inscribir_estudiante(self, curso, estudiante):
+    def inscribir_estudiante(self, curso, estudiante, periodo=None, tipo_matricula="Regular", fecha=None):
         if estudiante in curso.lista_estudiantes:
             raise ValueError("El estudiante ya esta inscrito en este curso")
-        # Agrega el estudiante.
-        curso.agregar_estudiante(estudiante)
-        # Cambia su estado.
+        if curso.cupo_actual >= curso.cupo_maximo:
+            raise ValueError("No hay cupos disponibles en este curso")
+
+        if isinstance(periodo, PeriodoAcademico):
+            periodo_obj = periodo
+        else:
+            periodo_obj = self.obtener_periodo(periodo or self.periodo_actual)
+        if not periodo_obj:
+            raise ValueError("Periodo academico no valido")
+        if periodo_obj.estado == "Cerrado":
+            raise ValueError("No se puede matricular: el periodo esta cerrado")
+
+        fecha_matricula = fecha or date.today().isoformat()
+        id_matricula = len(self.matriculas) + 1
+        facade = MatriculaFacade(periodo_obj, curso, estudiante)
+        if not facade.matricular(id_matricula, fecha_matricula, tipo_matricula):
+            raise ValueError("No se pudo completar la matricula")
+
+        matricula = estudiante.matricula
+        self.matriculas[id_matricula] = matricula
         estudiante.estado_nivelacion = "En Curso"
-        return curso
-    # Registra una carga académica.
-    def registrar_carga_academica(self, estudiante):
-        # Obtiene todos los cursos del estudiante.
+        return matricula
+    def registrar_carga_academica(self, estudiante, periodo=None):
         cursos_estudiante = self.obtener_cursos_estudiante(estudiante)
         total_asignaturas = len(cursos_estudiante)
-        # Si no tiene cursos.
         if total_asignaturas == 0:
             raise ValueError("El estudiante no tiene cursos inscritos")
-        # Verifica que no exista una carga académica previa.
+
+        periodo_nombre = periodo or self.periodo_actual
+        if periodo_nombre not in self.periodos_disponibles:
+            raise ValueError("Seleccione un periodo valido")
+
         for carga in self.cargas_academicas.values():
-            if carga.estudiante == estudiante and carga.periodo == self.periodo_actual:
-                raise ValueError("El estudiante ya tiene una carga academica registrada en el periodo actual")
-        # Calcula créditos.
+            if carga.estudiante == estudiante and carga.periodo == periodo_nombre:
+                raise ValueError("El estudiante ya tiene una carga academica registrada en ese periodo")
+
         total_creditos = total_asignaturas * self.CREDITOS_POR_CURSO
         id_carga = len(self.cargas_academicas) + 1
-        carga = CargaAcademica(id_carga, estudiante, self.periodo_actual, total_asignaturas, total_creditos)
+        carga = CargaAcademica(id_carga, estudiante, periodo_nombre, total_asignaturas, total_creditos)
         self.cargas_academicas[id_carga] = carga
         return carga
     # Obtiene los cursos donde está inscrito un estudiante.
     def obtener_cursos_estudiante(self, estudiante):
         return [curso for curso in self.cursos.values() if estudiante in curso.lista_estudiantes]
-    # Devuelve todos los períodos disponibles.
     def listar_periodos(self):
         return self.periodos_disponibles
-    # Genera un reporte.
+
+    def registrar_calificacion(self, docente, curso, estudiante, parcial1, parcial2, observacion=""):
+        if curso.docente != docente:
+            raise ValueError("El docente no es responsable de este curso")
+        if estudiante not in curso.lista_estudiantes:
+            raise ValueError("El estudiante no esta inscrito en este curso")
+
+        for registro in self.calificaciones.values():
+            if registro["estudiante"] == estudiante and registro["curso"] == curso:
+                raise ValueError("Ya existe una calificacion registrada para este estudiante en el curso")
+
+        id_calificacion = len(self.calificaciones) + 1
+        calificacion = Calificacion(id_calificacion, float(parcial1), float(parcial2))
+        calificacion.calcular_promedio()
+        calificacion.publicar_calificacion()
+        docente.registrar_notas(
+            id_calificacion,
+            estudiante.id_usuario,
+            float(parcial1),
+            float(parcial2),
+            observacion=observacion,
+            fecha=date.today().isoformat(),
+        )
+        registro = {
+            "calificacion": calificacion,
+            "estudiante": estudiante,
+            "curso": curso,
+            "docente": docente,
+            "periodo": self.periodo_actual,
+        }
+        self.calificaciones[id_calificacion] = registro
+        return calificacion
+
+    def registrar_asistencia(self, docente, curso, estudiante, fecha, estado, observacion=""):
+        if curso.docente != docente:
+            raise ValueError("El docente no es responsable de este curso")
+        if estudiante not in curso.lista_estudiantes:
+            raise ValueError("El estudiante no esta inscrito en este curso")
+
+        id_asistencia = len(self.asistencias) + 1
+        asistencia = Asistencia(id_asistencia, fecha, estado, observacion)
+        asistencia.anotar_asistencia(estado, observacion)
+        docente.registrar_asistencia(fecha, estado, estudiante.id_usuario)
+        registro = {
+            "asistencia": asistencia,
+            "estudiante": estudiante,
+            "curso": curso,
+            "docente": docente,
+            "periodo": self.periodo_actual,
+        }
+        self.asistencias[id_asistencia] = registro
+        return asistencia
+
+    def obtener_calificaciones_estudiante(self, estudiante, periodo=None):
+        registros = [
+            registro
+            for registro in self.calificaciones.values()
+            if registro["estudiante"] == estudiante
+        ]
+        if periodo:
+            registros = [registro for registro in registros if registro["periodo"] == periodo]
+        return registros
+
+    def obtener_asistencias_estudiante(self, estudiante, periodo=None):
+        registros = [
+            registro
+            for registro in self.asistencias.values()
+            if registro["estudiante"] == estudiante
+        ]
+        if periodo:
+            registros = [registro for registro in registros if registro["periodo"] == periodo]
+        return registros
+
+    def resumen_datos_reporte(self, tipo_reporte, periodo):
+        if tipo_reporte == "Asistencia":
+            total = sum(
+                1 for registro in self.asistencias.values() if registro["periodo"] == periodo
+            )
+            presentes = sum(
+                1
+                for registro in self.asistencias.values()
+                if registro["periodo"] == periodo and registro["asistencia"].estado == "Presente"
+            )
+            return f"Asistencias: {total} registros, {presentes} presentes"
+        if tipo_reporte == "Calificaciones":
+            registros = [
+                registro
+                for registro in self.calificaciones.values()
+                if registro["periodo"] == periodo
+            ]
+            if not registros:
+                return "Calificaciones: 0 registros"
+            promedio = round(
+                sum(registro["calificacion"].nota_final for registro in registros) / len(registros),
+                2,
+            )
+            return f"Calificaciones: {len(registros)} registros, promedio {promedio}"
+        if tipo_reporte == "Inscripciones":
+            return f"Inscripciones: {self.total_inscripciones()} estudiantes en cursos"
+        if tipo_reporte == "Carga academica":
+            cargas = [
+                carga for carga in self.cargas_academicas.values() if carga.periodo == periodo
+            ]
+            creditos = sum(carga.total_creditos for carga in cargas)
+            return f"Cargas academicas: {len(cargas)} registros, {creditos} creditos"
+        usuarios = len(self.usuarios)
+        cursos = len(self.cursos)
+        return f"General: {usuarios} usuarios, {cursos} cursos, periodo {periodo}"
+
     def generar_reporte(self, tipo_reporte, periodo, descripcion, formato):
-        # Verifica que el período exista.
         if periodo not in self.periodos_disponibles:
             raise ValueError("Seleccione un periodo valido")
-        # Selecciona el tipo de exportación.
+
+        resumen_datos = self.resumen_datos_reporte(tipo_reporte, periodo)
+        descripcion_completa = f"{descripcion.strip()} | {resumen_datos}"
         exportador = ExportarExcel() if formato == "Excel" else ExportarPDF()
-        # Fecha actual.
         fecha_generacion = date.today().isoformat()
-        
+
         id_reporte = len(self.reportes) + 1
-        # Crea el reporte.
         reporte = Reporte(
             id_reporte,
             tipo_reporte,
             fecha_generacion,
             periodo,
-            descripcion,
+            descripcion_completa,
             exportador,
         )
-        # Guarda el reporte.
         self.reportes[id_reporte] = reporte
         return reporte
     # Devuelve todos los docentes.
@@ -231,6 +443,10 @@ class SistemaNivelacion:
             "aulas": len(self.aulas),
             "cargas": len(self.cargas_academicas),
             "reportes": len(self.reportes),
+            "matriculas": len(self.matriculas),
+            "calificaciones": len(self.calificaciones),
+            "asistencias": len(self.asistencias),
+            "periodos": len(self.periodos),
         }
     # Carga datos de prueba para demostrar el funcionamiento.
     def cargar_datos_demo(self):
@@ -292,6 +508,9 @@ class SistemaNivelacion:
         # Inscribe estudiantes.
         self.inscribir_estudiante(curso, estudiante1)
         self.inscribir_estudiante(curso, estudiante2)
-        # Registra la carga académica.
+        self.registrar_calificacion(docente, curso, estudiante1, 8.5, 9.0, observacion="Buen desempeno")
+        self.registrar_calificacion(docente, curso, estudiante2, 6.5, 7.5, observacion="Mejora continua")
+        self.registrar_asistencia(docente, curso, estudiante1, "2026-03-10", "Presente")
+        self.registrar_asistencia(docente, curso, estudiante2, "2026-03-10", "Ausente", observacion="Falta justificada pendiente")
         self.registrar_carga_academica(estudiante1)
         self.generar_reporte("Asistencia", "2026-1", "Reporte general de asistencia", "PDF")

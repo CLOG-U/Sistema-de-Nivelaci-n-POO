@@ -1,9 +1,11 @@
 import streamlit as st
 
+from interfaz.auth import obtener_usuario_actual
 from interfaz.branding import encabezado_pagina
 from interfaz.components.forms import campos_usuario_base
 from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
 from interfaz.components.tables import usuario_detalle_campos, usuario_to_dict
+from modelos.admin import Administrador
 
 
 def _formulario_estudiante(sistema):
@@ -126,7 +128,7 @@ def _formulario_administrador(sistema):
 
 def _resumen_usuarios(sistema):
     intro_modulo(
-        "Control central de usuarios del sistema academico. Registre perfiles y consulte su estado.",
+        "Control central de usuarios. Use Administrador.gestionar_usuario() para activar o desactivar perfiles.",
         "👥",
     )
     fila_metricas(
@@ -141,6 +143,64 @@ def _resumen_usuarios(sistema):
     activos = sum(1 for u in sistema.usuarios.values() if u.estado)
     inactivos = len(sistema.usuarios) - activos
     fila_metricas([("Activos", activos), ("Inactivos", inactivos)], columnas=2)
+
+
+def _gestionar_usuarios(sistema):
+    admin = obtener_usuario_actual(sistema)
+    if not isinstance(admin, Administrador):
+        st.warning("Seleccione un administrador demo en el sidebar.")
+        return
+
+    usuarios = list(sistema.usuarios.values())
+    if not usuarios:
+        st.warning("No hay usuarios registrados.")
+        return
+
+    opciones = {
+        f"{u.nombres} {u.apellidos} · {u.cedula} · {'Activo' if u.estado else 'Inactivo'}": u
+        for u in usuarios
+    }
+
+    with st.form("form_gestion_usuario"):
+        usuario_etiqueta = st.selectbox("Usuario", list(opciones.keys()))
+        accion = st.selectbox("Accion", ["activar", "desactivar"])
+        motivo = st.text_input("Motivo (opcional)")
+        fecha = st.text_input("Fecha del cambio (opcional)", value="")
+        enviado = st.form_submit_button("Aplicar gestion", use_container_width=True)
+
+    if enviado:
+        try:
+            usuario = opciones[usuario_etiqueta]
+            mensaje = sistema.gestionar_usuario(
+                admin,
+                accion,
+                usuario,
+                motivo.strip() or None,
+                fecha.strip() or None,
+            )
+            st.success(mensaje)
+        except Exception as error:
+            st.error(str(error))
+
+    st.markdown("#### Edicion basica de contacto")
+    usuario_editar_etiqueta = st.selectbox(
+        "Usuario a editar",
+        list(opciones.keys()),
+        key="usuario_editar",
+    )
+    usuario_editar = opciones[usuario_editar_etiqueta]
+
+    with st.form("form_editar_usuario"):
+        nuevo_correo = st.text_input("Correo", value=usuario_editar.correo)
+        nuevo_telefono = st.text_input("Telefono", value=usuario_editar.telefono)
+        guardar = st.form_submit_button("Guardar cambios", use_container_width=True)
+
+    if guardar:
+        try:
+            sistema.actualizar_usuario(usuario_editar, correo=nuevo_correo, telefono=nuevo_telefono)
+            st.success(f"Datos actualizados para {usuario_editar.nombres} {usuario_editar.apellidos}")
+        except Exception as error:
+            st.error(str(error))
 
 
 def _consulta_usuarios(sistema):
@@ -179,9 +239,11 @@ def _consulta_usuarios(sistema):
 
 
 def mostrar_usuarios(sistema):
-    encabezado_pagina("Gestion de usuarios")
+    encabezado_pagina("Gestion de usuarios", periodo=sistema.periodo_actual)
 
-    tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
+    tab_resumen, tab_registrar, tab_gestionar, tab_consulta = st.tabs(
+        ["Resumen", "Registrar", "Gestionar", "Consulta"]
+    )
 
     with tab_resumen:
         _resumen_usuarios(sistema)
@@ -194,6 +256,10 @@ def mostrar_usuarios(sistema):
             _formulario_docente(sistema)
         with st.expander("Registrar administrador"):
             _formulario_administrador(sistema)
+
+    with tab_gestionar:
+        intro_modulo("Active, desactive o edite datos de contacto de usuarios existentes.", "⚙️")
+        _gestionar_usuarios(sistema)
 
     with tab_consulta:
         _consulta_usuarios(sistema)

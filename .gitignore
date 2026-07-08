@@ -1,4 +1,9 @@
 __pycache__/
 *.py[cod]
 *.zip
+.streamlit/secrets.toml
+interfaz/tareas.md
+interfaz/contexto_proyecto.md
+ejecucion.txt
+servicios/ejecucion.txt
 

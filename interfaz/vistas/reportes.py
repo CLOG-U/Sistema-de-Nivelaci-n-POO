@@ -2,7 +2,7 @@ import streamlit as st
 
 from interfaz.branding import encabezado_pagina
 from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
-from interfaz.components.tables import reporte_to_dict
+from interfaz.components.tables import asistencia_registro_to_dict, calificacion_registro_to_dict, reporte_to_dict
 
 
 def _formulario_reporte(sistema):
@@ -13,7 +13,7 @@ def _formulario_reporte(sistema):
             "Tipo de reporte",
             ["Asistencia", "Calificaciones", "Inscripciones", "Carga academica", "General"],
         )
-        periodo = st.selectbox("Periodo", periodos)
+        periodo = st.selectbox("Periodo academico", periodos)
         descripcion = st.text_input("Descripcion", value="Reporte academico del periodo")
         formato = st.selectbox("Formato", ["PDF", "Excel"])
         enviado = st.form_submit_button("Generar reporte", use_container_width=True)
@@ -22,6 +22,9 @@ def _formulario_reporte(sistema):
         try:
             if not descripcion:
                 raise ValueError("Complete todos los campos obligatorios")
+
+            resumen_previo = sistema.resumen_datos_reporte(tipo_reporte, periodo)
+            st.info(f"Datos reales incluidos: {resumen_previo}")
 
             reporte = sistema.generar_reporte(
                 tipo_reporte,
@@ -37,7 +40,10 @@ def _formulario_reporte(sistema):
 
 
 def _resumen_reportes(sistema):
-    intro_modulo("Generacion de reportes academicos con patron Strategy (PDF / Excel).", "📊")
+    intro_modulo(
+        "Reportes con datos reales de asistencia, calificaciones, inscripciones y cargas del periodo.",
+        "📊",
+    )
     reportes = list(sistema.reportes.values())
     pdf = sum(1 for r in reportes if r.formato == "PDF")
     excel = sum(1 for r in reportes if r.formato == "Excel")
@@ -46,10 +52,18 @@ def _resumen_reportes(sistema):
     fila_metricas(
         [
             ("Reportes generados", len(reportes)),
-            ("Formato PDF", pdf),
-            ("Formato Excel", excel),
+            ("Calificaciones", len(sistema.calificaciones)),
+            ("Asistencias", len(sistema.asistencias)),
             ("Tipos distintos", tipos),
         ]
+    )
+    fila_metricas(
+        [
+            ("Formato PDF", pdf),
+            ("Formato Excel", excel),
+            ("Periodo activo", sistema.periodo_actual),
+        ],
+        columnas=3,
     )
 
     if reportes:
@@ -85,9 +99,25 @@ def _consulta_reportes(sistema):
             ],
         )
 
+    st.markdown("#### Datos academicos usados en reportes")
+    col1, col2 = st.columns(2)
+    with col1:
+        calificaciones = [
+            calificacion_registro_to_dict(registro)
+            for registro in sistema.calificaciones.values()
+        ]
+        st.markdown("**Calificaciones registradas**")
+        tabla_o_vacio(calificaciones, "Sin calificaciones.")
+    with col2:
+        asistencias = [
+            asistencia_registro_to_dict(registro) for registro in sistema.asistencias.values()
+        ]
+        st.markdown("**Asistencias registradas**")
+        tabla_o_vacio(asistencias, "Sin asistencias.")
+
 
 def mostrar_reportes(sistema):
-    encabezado_pagina("Reportes academicos")
+    encabezado_pagina("Reportes academicos", periodo=sistema.periodo_actual)
 
     tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
 
@@ -95,7 +125,7 @@ def mostrar_reportes(sistema):
         _resumen_reportes(sistema)
 
     with tab_registrar:
-        intro_modulo("Genere reportes exportables usando el patron Strategy del sistema.", "📝")
+        intro_modulo("Genere reportes exportables con resumen de datos reales del periodo.", "📝")
         _formulario_reporte(sistema)
 
     with tab_consulta:

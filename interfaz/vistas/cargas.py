@@ -2,7 +2,7 @@ import streamlit as st
 
 from interfaz.branding import encabezado_pagina
 from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
-from interfaz.components.tables import carga_to_dict
+from interfaz.components.tables import carga_to_dict, periodo_to_dict
 
 
 def _formulario_carga(sistema):
@@ -11,16 +11,24 @@ def _formulario_carga(sistema):
         st.warning("No hay estudiantes registrados.")
         return
 
+    periodos_abiertos = sistema.listar_periodos_abiertos()
+    if not periodos_abiertos:
+        st.warning("No hay periodos academicos abiertos.")
+        return
+
     opciones_estudiantes = {f"{e.cedula} - {e.nombres} {e.apellidos}": e for e in estudiantes}
+    opciones_periodos = {f"{p.nombre} ({p.estado})": p.nombre for p in periodos_abiertos}
 
     with st.form("form_carga"):
         estudiante_etiqueta = st.selectbox("Estudiante", list(opciones_estudiantes.keys()))
+        periodo_etiqueta = st.selectbox("Periodo academico", list(opciones_periodos.keys()))
         enviado = st.form_submit_button("Generar carga academica", use_container_width=True)
 
     if enviado:
         try:
             estudiante = opciones_estudiantes[estudiante_etiqueta]
-            carga = sistema.registrar_carga_academica(estudiante)
+            periodo = opciones_periodos[periodo_etiqueta]
+            carga = sistema.registrar_carga_academica(estudiante, periodo=periodo)
             st.success(
                 f"Carga generada para {estudiante.nombres} {estudiante.apellidos}. "
                 f"Periodo: {carga.periodo}. "
@@ -31,8 +39,29 @@ def _formulario_carga(sistema):
             st.error(str(error))
 
 
+def _formulario_periodo(sistema):
+    with st.form("form_periodo_cargas"):
+        nombre = st.text_input("Nombre del periodo", placeholder="2026-2")
+        fecha_inicio = st.text_input("Fecha inicio (AAAA-MM-DD)", value="2026-07-01")
+        fecha_fin = st.text_input("Fecha fin (AAAA-MM-DD)", value="2026-12-15")
+        estado = st.selectbox("Estado inicial", ["Abierto", "Cerrado"])
+        enviado = st.form_submit_button("Registrar periodo", use_container_width=True)
+
+    if enviado:
+        try:
+            periodo = sistema.registrar_periodo(
+                nombre.strip(),
+                fecha_inicio.strip(),
+                fecha_fin.strip(),
+                estado,
+            )
+            st.success(f"Periodo {periodo.nombre} registrado con estado {periodo.estado}")
+        except Exception as error:
+            st.error(str(error))
+
+
 def _resumen_cargas(sistema):
-    intro_modulo("Generacion y seguimiento de cargas academicas por periodo.", "📑")
+    intro_modulo("Generacion y seguimiento de cargas academicas por periodo academico.", "📑")
     cargas = list(sistema.cargas_academicas.values())
     creditos = sum(c.total_creditos for c in cargas)
     asignaturas = sum(c.total_asignaturas for c in cargas)
@@ -46,6 +75,11 @@ def _resumen_cargas(sistema):
             ("Total creditos", creditos),
         ]
     )
+
+    periodos = sistema.listar_periodos_academicos()
+    if periodos:
+        st.markdown("#### Periodos disponibles")
+        tabla_o_vacio([periodo_to_dict(p) for p in periodos], "Sin periodos.")
 
 
 def _consulta_cargas(sistema):
@@ -80,7 +114,7 @@ def _consulta_cargas(sistema):
 
 
 def mostrar_cargas(sistema):
-    encabezado_pagina("Cargas academicas")
+    encabezado_pagina("Cargas academicas", periodo=sistema.periodo_actual)
 
     tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
 
@@ -88,8 +122,10 @@ def mostrar_cargas(sistema):
         _resumen_cargas(sistema)
 
     with tab_registrar:
-        intro_modulo("Genere la carga academica de un estudiante con cursos inscritos.", "📝")
+        intro_modulo("Genere cargas por periodo academico seleccionado.", "📝")
         _formulario_carga(sistema)
+        with st.expander("Registrar nuevo periodo academico"):
+            _formulario_periodo(sistema)
 
     with tab_consulta:
         _consulta_cargas(sistema)

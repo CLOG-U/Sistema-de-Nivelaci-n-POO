@@ -26,6 +26,8 @@ def inicializar_sesion():
         st.session_state.rol_actual = None
     if "usuario_actual_id" not in st.session_state:
         st.session_state.usuario_actual_id = None
+    if "nav_seleccion" not in st.session_state:
+        st.session_state.nav_seleccion = None
 
 
 def cerrar_sesion():

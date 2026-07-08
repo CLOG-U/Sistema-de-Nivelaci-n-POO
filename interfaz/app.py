@@ -17,23 +17,23 @@ from interfaz.auth import (
 )
 from interfaz.branding import TITULO_APP, encabezado_sidebar
 from interfaz.navigation import obtener_opciones_por_rol
-from interfaz.pages.acerca import mostrar_acerca
-from interfaz.pages.aulas import mostrar_aulas
-from interfaz.pages.cargas import mostrar_cargas
-from interfaz.pages.cursos import mostrar_cursos
-from interfaz.pages.dashboard import mostrar_dashboard
-from interfaz.pages.dashboard_docente import mostrar_dashboard_docente
-from interfaz.pages.dashboard_estudiante import mostrar_dashboard_estudiante
-from interfaz.pages.estudiantes_docente import mostrar_estudiantes_docente
-from interfaz.pages.horarios import mostrar_horarios
-from interfaz.pages.inscripciones import mostrar_inscripciones
-from interfaz.pages.mi_carga import mostrar_mi_carga
-from interfaz.pages.mi_perfil import mostrar_mi_perfil
-from interfaz.pages.mis_cursos import mostrar_mis_cursos
-from interfaz.pages.mis_horarios import mostrar_mis_horarios
-from interfaz.pages.reportes import mostrar_reportes
-from interfaz.pages.reportes_docente import mostrar_reportes_docente
-from interfaz.pages.usuarios import mostrar_usuarios
+from interfaz.vistas.acerca import mostrar_acerca
+from interfaz.vistas.aulas import mostrar_aulas
+from interfaz.vistas.cargas import mostrar_cargas
+from interfaz.vistas.cursos import mostrar_cursos
+from interfaz.vistas.dashboard import mostrar_dashboard
+from interfaz.vistas.dashboard_docente import mostrar_dashboard_docente
+from interfaz.vistas.dashboard_estudiante import mostrar_dashboard_estudiante
+from interfaz.vistas.estudiantes_docente import mostrar_estudiantes_docente
+from interfaz.vistas.horarios import mostrar_horarios
+from interfaz.vistas.inscripciones import mostrar_inscripciones
+from interfaz.vistas.mi_carga import mostrar_mi_carga
+from interfaz.vistas.mi_perfil import mostrar_mi_perfil
+from interfaz.vistas.mis_cursos import mostrar_mis_cursos
+from interfaz.vistas.mis_horarios import mostrar_mis_horarios
+from interfaz.vistas.reportes import mostrar_reportes
+from interfaz.vistas.reportes_docente import mostrar_reportes_docente
+from interfaz.vistas.usuarios import mostrar_usuarios
 
 RUTAS = {
     "Dashboard": mostrar_dashboard,
@@ -128,7 +128,18 @@ def main():
     st.sidebar.caption("Menu de navegacion")
 
     opciones = obtener_opciones_por_rol(rol)
-    opcion = st.sidebar.radio("Navegacion", opciones, label_visibility="collapsed")
+    if st.session_state.nav_seleccion not in opciones:
+        st.session_state.nav_seleccion = opciones[0]
+
+    indice_nav = opciones.index(st.session_state.nav_seleccion)
+    opcion = st.sidebar.radio(
+        "Navegacion",
+        opciones,
+        index=indice_nav,
+        label_visibility="collapsed",
+        key="nav_radio",
+    )
+    st.session_state.nav_seleccion = opcion
 
     RUTAS[opcion](sistema)
     pie_pagina()

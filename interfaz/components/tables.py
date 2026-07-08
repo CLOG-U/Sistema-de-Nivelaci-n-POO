@@ -95,6 +95,65 @@ def reporte_to_dict(reporte):
     }
 
 
+def matricula_to_dict(matricula):
+    if not matricula:
+        return {
+            "ID matricula": "-",
+            "Periodo": "-",
+            "Tipo": "-",
+            "Fecha": "-",
+            "Estado": "-",
+        }
+    return {
+        "ID matricula": matricula.id_matricula,
+        "Periodo": matricula.periodo,
+        "Tipo": matricula.tipo_matricula,
+        "Fecha": matricula.fecha_matricula,
+        "Estado": matricula.estado,
+    }
+
+
+def periodo_to_dict(periodo):
+    return {
+        "ID": periodo.id_periodo,
+        "Nombre": periodo.nombre,
+        "Inicio": periodo.fecha_inicio,
+        "Fin": periodo.fecha_fin,
+        "Estado": periodo.estado,
+    }
+
+
+def calificacion_registro_to_dict(registro):
+    calificacion = registro["calificacion"]
+    estudiante = registro["estudiante"]
+    curso = registro["curso"]
+    return {
+        "ID": calificacion.id_calificacion,
+        "Estudiante": f"{estudiante.nombres} {estudiante.apellidos}",
+        "Curso": curso.codigo,
+        "Parcial 1": calificacion.nota_parcial1,
+        "Parcial 2": calificacion.nota_parcial2,
+        "Nota final": calificacion.nota_final,
+        "Estado": calificacion.estado,
+        "Periodo": registro["periodo"],
+    }
+
+
+def asistencia_registro_to_dict(registro):
+    asistencia = registro["asistencia"]
+    estudiante = registro["estudiante"]
+    curso = registro["curso"]
+    return {
+        "ID": asistencia.id_asistencia,
+        "Estudiante": f"{estudiante.nombres} {estudiante.apellidos}",
+        "Curso": curso.codigo,
+        "Fecha": asistencia.fecha,
+        "Estado": asistencia.estado,
+        "Observacion": asistencia.observacion or "-",
+        "Periodo": registro["periodo"],
+    }
+
+
 def usuario_detalle_campos(usuario):
     campos = [
         ("ID", usuario.id_usuario),

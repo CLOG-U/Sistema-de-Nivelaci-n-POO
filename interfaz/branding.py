@@ -30,9 +30,10 @@ def encabezado_sidebar():
     """
 
 
-def encabezado_pagina(titulo_modulo):
+def encabezado_pagina(titulo_modulo, periodo=None):
     import streamlit as st
 
+    periodo_texto = periodo or PERIODO_ACTUAL
     st.markdown(
         f"""
         <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid {COLOR_ROJO};">
@@ -42,5 +43,5 @@ def encabezado_pagina(titulo_modulo):
         """,
         unsafe_allow_html=True,
     )
-    st.caption(f"{NOMBRE_SISTEMA} · {MODULO_POO} · Periodo {PERIODO_ACTUAL}")
+    st.caption(f"{NOMBRE_SISTEMA} · {MODULO_POO} · Periodo {periodo_texto}")
     st.title(titulo_modulo)
