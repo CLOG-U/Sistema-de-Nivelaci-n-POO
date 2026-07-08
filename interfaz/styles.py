@@ -72,6 +72,32 @@ def aplicar_estilos():
                 background-color: {COLOR_NEGRO};
                 color: {COLOR_BLANCO};
             }}
+            .role-badge {{
+                display:inline-block;
+                padding:6px 12px;
+                border-radius:999px;
+                font-weight:600;
+                font-size:0.85rem;
+                background:{COLOR_NEGRO};
+                color:{COLOR_BLANCO};
+                margin-bottom:8px;
+            }}
+            .role-card {{
+                background:{COLOR_BLANCO};
+                border:1px solid #dddddd;
+                border-top:4px solid {COLOR_ROJO};
+                border-radius:12px;
+                padding:18px;
+                box-shadow:0 2px 8px rgba(26,26,26,0.08);
+                margin-bottom:14px;
+            }}
+            .readonly-box {{
+                background:#f7f7f7;
+                border-left:4px solid {COLOR_VERDE};
+                padding:12px 14px;
+                border-radius:8px;
+                margin-bottom:12px;
+            }}
         </style>
         """,
         unsafe_allow_html=True,
