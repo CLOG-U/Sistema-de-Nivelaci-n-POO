@@ -1,12 +1,13 @@
 class PeriodoAcademico:
 
-    def __init__(self, id_periodo, nombre, fecha_inicio, fecha_fin, estado="Cerrado"):
+    def __init__(self, id_periodo, nombre, fecha_inicio, fecha_fin, estado="Cerrado"):  # Inicializa los datos principales del período académico.
         self.__id_periodo = id_periodo
         self.__nombre = nombre
         self.__fecha_inicio = fecha_inicio
         self.__fecha_fin = fecha_fin
         self.__estado = estado
 #usamos propiedades para acceder a los atributos privados 
+    # Métodos Getter (lectura)
     @property
     def id_periodo(self):
         return self.__id_periodo
@@ -26,7 +27,7 @@ class PeriodoAcademico:
     @property
     def estado(self):
         return self.__estado
-
+# Método Setter (modificación)
     @estado.setter
     def estado(self, valor):
         self.__estado = valor
@@ -39,6 +40,6 @@ class PeriodoAcademico:
         self.__estado = "Cerrado"
         print("Periodo " + self.__nombre + " cerrado")
 
-#se muestra la informacion del periodo 
+#Muestra la información principal del período académico, incluyendo las fechas de inicio, fin y su estado.
     def listar_periodos(self):
         print("Periodo: " + self.__nombre + " del " + self.__fecha_inicio + " al " + self.__fecha_fin + " estado: " + self.__estado)
