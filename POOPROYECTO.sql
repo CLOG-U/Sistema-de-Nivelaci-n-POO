@@ -138,3 +138,10 @@ CREATE TABLE CargaAcademica(
     FOREIGN KEY(id_periodo)
         REFERENCES PeriodoAcademico(id_periodo)
 );
+
+CREATE TABLE Asistencia(
+    id_asistencia INT PRIMARY KEY,
+    fecha DATE,
+    estado VARCHAR(20),
+    observacion VARCHAR(255)
+);
