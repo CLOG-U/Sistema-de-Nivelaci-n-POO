@@ -41,3 +41,13 @@ CREATE TABLE Docente(
     FOREIGN KEY(id_usuario)
         REFERENCES Usuario(id_usuario)
 );
+
+CREATE TABLE Estudiante(
+    id_usuario INT PRIMARY KEY,
+    tipo_documento VARCHAR(30),
+    fecha_nacimiento DATE,
+    discapacidad BIT,
+
+    FOREIGN KEY(id_usuario)
+        REFERENCES Usuario(id_usuario)
+);
