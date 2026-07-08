@@ -65,7 +65,7 @@ def main():
     
     
     # registrando un nuevo usuario como administrador
-    registrar_usuario = admin1.registrar_usuario("Estudiante", 10, "0123456789", "Carlos", "Gonzalez", "carlos.gonzalez@uleam.edu.ec", "contrasena123", "0987654321", "Cédula", "2001-05-10")
+    registrar_usuario = admin1.registrar_usuario("Estudiante", 10, "0123456789", "Carlos", "Gonzalez", "carlos.gonzalez@uleam.edu.ec", "est2123", "0987654321", "Cédula", "2001-05-10")
     if registrar_usuario is not None: 
         print("Usuario registrado correctamente:") 
         registrar_usuario.mostrar_info()
