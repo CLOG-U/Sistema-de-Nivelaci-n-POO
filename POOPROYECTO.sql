@@ -72,3 +72,16 @@ CREATE TABLE Aula(
     edificio VARCHAR(100),
     estado BIT
 );
+
+CREATE TABLE Horario(
+    id_horario INT PRIMARY KEY,
+    dia VARCHAR(20),
+    hora_inicio TIME,
+    hora_fin TIME,
+    modalidad VARCHAR(30),
+    grupo VARCHAR(20),
+    id_aula INT NOT NULL,
+
+    FOREIGN KEY(id_aula)
+        REFERENCES Aula(id_aula)
+);
