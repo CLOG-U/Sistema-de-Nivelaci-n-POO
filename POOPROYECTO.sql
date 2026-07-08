@@ -145,3 +145,14 @@ CREATE TABLE Asistencia(
     estado VARCHAR(20),
     observacion VARCHAR(255)
 );
+
+CREATE TABLE DetalleAsistencia(
+    id_detalle_asistencia INT IDENTITY(1,1) PRIMARY KEY,
+    id_asistencia INT NOT NULL,
+    tipo_justificacion VARCHAR(50),
+    observacion VARCHAR(255),
+    documento_soporte VARCHAR(255),
+
+    FOREIGN KEY(id_asistencia)
+        REFERENCES Asistencia(id_asistencia)
+);
