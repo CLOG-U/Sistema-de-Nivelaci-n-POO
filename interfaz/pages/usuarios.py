@@ -2,18 +2,17 @@ import streamlit as st
 
 from interfaz.branding import encabezado_pagina
 from interfaz.components.forms import campos_usuario_base
-from interfaz.components.tables import usuario_to_dict
+from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
+from interfaz.components.tables import usuario_detalle_campos, usuario_to_dict
 
 
 def _formulario_estudiante(sistema):
-    st.subheader("Registrar estudiante")
-
     with st.form("form_estudiante"):
         datos = campos_usuario_base("est")
         tipo_documento = st.selectbox("Tipo de documento", ["Cedula", "Pasaporte"])
         fecha_nacimiento = st.text_input("Fecha de nacimiento (AAAA-MM-DD)")
         discapacidad = st.checkbox("Discapacidad")
-        enviado = st.form_submit_button("Registrar estudiante")
+        enviado = st.form_submit_button("Registrar estudiante", use_container_width=True)
 
     if enviado:
         try:
@@ -51,13 +50,11 @@ def _formulario_estudiante(sistema):
 
 
 def _formulario_docente(sistema):
-    st.subheader("Registrar docente")
-
     with st.form("form_docente"):
         datos = campos_usuario_base("doc")
         titulo_profesional = st.text_input("Titulo profesional")
         especialidad = st.text_input("Especialidad")
-        enviado = st.form_submit_button("Registrar docente")
+        enviado = st.form_submit_button("Registrar docente", use_container_width=True)
 
     if enviado:
         try:
@@ -92,12 +89,10 @@ def _formulario_docente(sistema):
 
 
 def _formulario_administrador(sistema):
-    st.subheader("Registrar administrador")
-
     with st.form("form_administrador"):
         datos = campos_usuario_base("adm")
         cargo = st.text_input("Cargo")
-        enviado = st.form_submit_button("Registrar administrador")
+        enviado = st.form_submit_button("Registrar administrador", use_container_width=True)
 
     if enviado:
         try:
@@ -129,21 +124,76 @@ def _formulario_administrador(sistema):
             st.error(str(error))
 
 
-def mostrar_usuarios(sistema):
-    encabezado_pagina("Gestion de usuarios")
+def _resumen_usuarios(sistema):
+    intro_modulo(
+        "Control central de usuarios del sistema academico. Registre perfiles y consulte su estado.",
+        "👥",
+    )
+    fila_metricas(
+        [
+            ("Total usuarios", len(sistema.usuarios)),
+            ("Estudiantes", len(sistema.listar_estudiantes())),
+            ("Docentes", len(sistema.listar_docentes())),
+            ("Administradores", len(sistema.listar_administradores())),
+        ]
+    )
 
-    _formulario_estudiante(sistema)
-    st.divider()
-    _formulario_docente(sistema)
-    st.divider()
-    _formulario_administrador(sistema)
+    activos = sum(1 for u in sistema.usuarios.values() if u.estado)
+    inactivos = len(sistema.usuarios) - activos
+    fila_metricas([("Activos", activos), ("Inactivos", inactivos)], columnas=2)
 
-    st.divider()
-    st.subheader("Usuarios registrados")
 
-    if not sistema.usuarios:
+def _consulta_usuarios(sistema):
+    usuarios = list(sistema.usuarios.values())
+    if not usuarios:
         st.warning("No hay usuarios registrados.")
         return
 
-    filas = [usuario_to_dict(usuario) for usuario in sistema.usuarios.values()]
-    st.dataframe(filas, use_container_width=True, hide_index=True)
+    filtro = st.selectbox(
+        "Filtrar por tipo",
+        ["Todos", "Estudiante", "Docente", "Administrador"],
+    )
+
+    if filtro != "Todos":
+        usuarios = [u for u in usuarios if usuario_to_dict(u)["Tipo"] == filtro]
+
+    busqueda = st.text_input("Buscar por cedula, nombre o correo").strip().lower()
+    if busqueda:
+        usuarios = [
+            u
+            for u in usuarios
+            if busqueda in u.cedula.lower()
+            or busqueda in u.nombres.lower()
+            or busqueda in u.apellidos.lower()
+            or busqueda in u.correo.lower()
+        ]
+
+    filas = [usuario_to_dict(usuario) for usuario in usuarios]
+    if not tabla_o_vacio(filas, "No hay usuarios que coincidan con el filtro."):
+        return
+
+    st.markdown("#### Detalle de usuarios")
+    for usuario in usuarios:
+        titulo = f"{usuario.nombres} {usuario.apellidos} · {usuario.cedula}"
+        detalle_entidad(titulo, usuario_detalle_campos(usuario))
+
+
+def mostrar_usuarios(sistema):
+    encabezado_pagina("Gestion de usuarios")
+
+    tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
+
+    with tab_resumen:
+        _resumen_usuarios(sistema)
+
+    with tab_registrar:
+        intro_modulo("Formularios de registro por tipo de usuario.", "📝")
+        with st.expander("Registrar estudiante", expanded=True):
+            _formulario_estudiante(sistema)
+        with st.expander("Registrar docente"):
+            _formulario_docente(sistema)
+        with st.expander("Registrar administrador"):
+            _formulario_administrador(sistema)
+
+    with tab_consulta:
+        _consulta_usuarios(sistema)

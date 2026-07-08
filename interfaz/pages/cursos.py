@@ -1,12 +1,11 @@
 import streamlit as st
 
 from interfaz.branding import encabezado_pagina
-from interfaz.components.tables import curso_to_dict
+from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
+from interfaz.components.tables import curso_detalle_dict, usuario_to_dict
 
 
 def _formulario_curso(sistema):
-    st.subheader("Registrar curso")
-
     docentes = sistema.listar_docentes()
     if not docentes or not sistema.aulas or not sistema.horarios:
         st.warning("Debe existir al menos un docente, un aula y un horario para crear un curso.")
@@ -28,8 +27,7 @@ def _formulario_curso(sistema):
         docente_etiqueta = st.selectbox("Docente", list(opciones_docentes.keys()))
         horario_etiqueta = st.selectbox("Horario", list(opciones_horarios.keys()))
         aula_etiqueta = st.selectbox("Aula", list(opciones_aulas.keys()))
-
-        enviado = st.form_submit_button("Registrar curso")
+        enviado = st.form_submit_button("Registrar curso", use_container_width=True)
 
     if enviado:
         try:
@@ -51,17 +49,71 @@ def _formulario_curso(sistema):
             st.error(str(error))
 
 
-def mostrar_cursos(sistema):
-    encabezado_pagina("Gestion de cursos de nivelacion")
+def _resumen_cursos(sistema):
+    intro_modulo("Gestion de cursos de nivelacion con docente, horario y aula asignados.", "📚")
+    cursos = list(sistema.cursos.values())
+    inscritos = sistema.total_inscripciones()
+    cupo_total = sum(c.cupo_maximo for c in cursos)
+    cupo_usado = sum(c.cupo_actual for c in cursos)
 
-    _formulario_curso(sistema)
+    fila_metricas(
+        [
+            ("Cursos activos", len(cursos)),
+            ("Estudiantes inscritos", inscritos),
+            ("Cupo total", cupo_total),
+            ("Cupo utilizado", cupo_usado),
+        ]
+    )
 
-    st.divider()
-    st.subheader("Cursos de nivelacion")
 
-    if not sistema.cursos:
+def _consulta_cursos(sistema):
+    cursos = list(sistema.cursos.values())
+    if not cursos:
         st.warning("No hay cursos registrados.")
         return
 
-    filas = [curso_to_dict(curso) for curso in sistema.cursos.values()]
-    st.dataframe(filas, use_container_width=True, hide_index=True)
+    filtro_docente = st.selectbox(
+        "Filtrar por docente",
+        ["Todos"] + [f"{d.nombres} {d.apellidos}" for d in sistema.listar_docentes()],
+    )
+    if filtro_docente != "Todos":
+        cursos = [c for c in cursos if f"{c.docente.nombres} {c.docente.apellidos}" == filtro_docente]
+
+    filas = [curso_detalle_dict(curso) for curso in cursos]
+    if not tabla_o_vacio(filas, "No hay cursos con ese filtro."):
+        return
+
+    for curso in cursos:
+        with st.expander(f"{curso.codigo} · {curso.nombre}", expanded=False):
+            detalle_entidad(
+                "Informacion del curso",
+                [
+                    ("Docente", f"{curso.docente.nombres} {curso.docente.apellidos}"),
+                    ("Paralelo", curso.paralelo),
+                    ("Cupo", f"{curso.cupo_actual}/{curso.cupo_maximo}"),
+                    ("Horario", f"{curso.horario.dia} {curso.horario.hora_inicio}-{curso.horario.hora_fin}"),
+                    ("Aula", f"{curso.aula.codigo} - {curso.aula.nombre}"),
+                ],
+            )
+            if curso.lista_estudiantes:
+                st.markdown("**Estudiantes inscritos**")
+                inscritos = [usuario_to_dict(e) for e in curso.lista_estudiantes]
+                st.dataframe(inscritos, use_container_width=True, hide_index=True)
+            else:
+                st.info("Sin estudiantes inscritos.")
+
+
+def mostrar_cursos(sistema):
+    encabezado_pagina("Gestion de cursos de nivelacion")
+
+    tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
+
+    with tab_resumen:
+        _resumen_cursos(sistema)
+
+    with tab_registrar:
+        intro_modulo("Cree cursos vinculando docente, horario y aula.", "📝")
+        _formulario_curso(sistema)
+
+    with tab_consulta:
+        _consulta_cursos(sistema)

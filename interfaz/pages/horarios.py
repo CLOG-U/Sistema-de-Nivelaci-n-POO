@@ -1,12 +1,14 @@
 import streamlit as st
 
 from interfaz.branding import encabezado_pagina
+from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
 from interfaz.components.tables import horario_to_dict
 
 
-def _formulario_horario(sistema):
-    st.subheader("Registrar horario")
+ORDEN_DIAS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"]
 
+
+def _formulario_horario(sistema):
     if not sistema.aulas:
         st.warning("Debe registrar al menos un aula antes de crear un horario.")
         return
@@ -20,8 +22,7 @@ def _formulario_horario(sistema):
         modalidad = st.selectbox("Modalidad", ["Presencial", "Virtual", "Hibrida"])
         grupo = st.text_input("Grupo")
         aula_etiqueta = st.selectbox("Aula", list(opciones_aulas.keys()))
-
-        enviado = st.form_submit_button("Registrar horario")
+        enviado = st.form_submit_button("Registrar horario", use_container_width=True)
 
     if enviado:
         try:
@@ -42,17 +43,69 @@ def _formulario_horario(sistema):
             st.error(str(error))
 
 
-def mostrar_horarios(sistema):
-    encabezado_pagina("Gestion de horarios")
+def _resumen_horarios(sistema):
+    intro_modulo("Planificacion de bloques horarios, modalidad y aulas asociadas.", "🕐")
+    horarios = list(sistema.horarios.values())
+    presencial = sum(1 for h in horarios if h.modalidad == "Presencial")
+    virtual = sum(1 for h in horarios if h.modalidad == "Virtual")
+    hibrida = sum(1 for h in horarios if h.modalidad == "Hibrida")
 
-    _formulario_horario(sistema)
+    fila_metricas(
+        [
+            ("Total horarios", len(horarios)),
+            ("Presencial", presencial),
+            ("Virtual", virtual),
+            ("Hibrida", hibrida),
+        ]
+    )
 
-    st.divider()
-    st.subheader("Horarios registrados")
+    resumen_dia = sistema.resumen_horarios_por_dia()
+    if resumen_dia:
+        st.markdown("#### Distribucion por dia")
+        st.bar_chart(resumen_dia)
 
-    if not sistema.horarios:
+
+def _consulta_horarios(sistema):
+    horarios = list(sistema.horarios.values())
+    if not horarios:
         st.warning("No hay horarios registrados.")
         return
 
-    filas = [horario_to_dict(horario) for horario in sistema.horarios.values()]
-    st.dataframe(filas, use_container_width=True, hide_index=True)
+    filtro_dia = st.selectbox(
+        "Filtrar por dia",
+        ["Todos"]
+        + sorted({h.dia for h in horarios}, key=lambda d: ORDEN_DIAS.index(d) if d in ORDEN_DIAS else 99),
+    )
+    if filtro_dia != "Todos":
+        horarios = [h for h in horarios if h.dia == filtro_dia]
+
+    filas = [horario_to_dict(horario) for horario in horarios]
+    if not tabla_o_vacio(filas, "No hay horarios con ese filtro."):
+        return
+
+    for horario in horarios:
+        aula = horario.aula
+        detalle_entidad(
+            f"{horario.dia} {horario.hora_inicio}-{horario.hora_fin} · Grupo {horario.grupo}",
+            [
+                ("Modalidad", horario.modalidad),
+                ("Aula", f"{aula.codigo} - {aula.nombre}" if aula else "Sin aula"),
+                ("Edificio", aula.edificio if aula else "N/A"),
+            ],
+        )
+
+
+def mostrar_horarios(sistema):
+    encabezado_pagina("Gestion de horarios")
+
+    tab_resumen, tab_registrar, tab_consulta = st.tabs(["Resumen", "Registrar", "Consulta"])
+
+    with tab_resumen:
+        _resumen_horarios(sistema)
+
+    with tab_registrar:
+        intro_modulo("Cree bloques horarios vinculados a un aula existente.", "📝")
+        _formulario_horario(sistema)
+
+    with tab_consulta:
+        _consulta_horarios(sistema)
