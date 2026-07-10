@@ -134,19 +134,23 @@ class GestorIdioma:
         return cls._instancia
 
     def _asegurar_idioma_sesion(self):
+        # Asegura que el idioma esté inicializado en la sesión
         if "idioma" not in st.session_state:
             st.session_state.idioma = IDIOMA_DEFECTO
 
     def obtener_idioma(self) -> str:
+        # Retorna el idioma actual, validando que sea válido
         self._asegurar_idioma_sesion()
         codigo = st.session_state.idioma
         return codigo if codigo in IDIOMAS_VALIDOS else IDIOMA_DEFECTO
 
     def cambiar_idioma(self, codigo: str):
+        # Cambia el idioma si el código proporcionado es válido
         if codigo in IDIOMAS_VALIDOS:
             st.session_state.idioma = codigo
 
     def t(self, clave: str, **kwargs) -> str:
+        # Traduce una clave al idioma actual con formato de parámetros opcionales
         idioma = self.obtener_idioma()
         texto = TRADUCCIONES.get(idioma, {}).get(clave)
         if texto is None:
@@ -154,10 +158,12 @@ class GestorIdioma:
         return texto.format(**kwargs) if kwargs else texto
 
     def etiqueta_menu(self, clave_interna: str) -> str:
+        # Convierte una clave interna de menú a su etiqueta visible en el idioma actual
         idioma = self.obtener_idioma()
         return MENU_INTERNO.get(clave_interna, {}).get(idioma, clave_interna)
 
     def clave_menu(self, etiqueta_visible: str) -> str:
+        # Convierte una etiqueta visible de menú a su clave interna
         idioma = self.obtener_idioma()
         for clave, textos in MENU_INTERNO.items():
             if textos.get(idioma) == etiqueta_visible:
@@ -165,6 +171,7 @@ class GestorIdioma:
         return etiqueta_visible
 
     def traducir_rol(self, rol: str) -> str:
+        # Traduce un rol de usuario al idioma actual
         mapa = {
             "Administrador": "rol.administrador",
             "Docente": "rol.docente",
@@ -174,14 +181,17 @@ class GestorIdioma:
 
 
 def obtener_gestor_idioma() -> GestorIdioma:
+    # Retorna la instancia singleton del gestor de idioma
     return GestorIdioma()
 
 
 def t(clave: str, **kwargs) -> str:
+    # Función auxiliar para traducir una clave usando el gestor de idioma
     return obtener_gestor_idioma().t(clave, **kwargs)
 
 
 def selector_idioma(ubicacion: str = "main"):
+    # Renderiza botones de selección de idioma (ES | EN) en la ubicación especificada
     """Botones ES | EN. ubicacion: 'main' (login) o 'sidebar'."""
     gestor = obtener_gestor_idioma()
     idioma = gestor.obtener_idioma()
