@@ -26,6 +26,7 @@ MENU_INTERNO = {
     "Mi Horario": {"es": "Mi Horario", "en": "My Schedule"},
     "Mi Carga": {"es": "Mi Carga", "en": "My Load"},
     "Mi Perfil": {"es": "Mi Perfil", "en": "My Profile"},
+    "Mis Reportes": {"es": "Mis Reportes", "en": "My Reports"},
 }
 
 TRADUCCIONES = {
@@ -74,6 +75,7 @@ TRADUCCIONES = {
         "modulos.estudiante.horario": "Horario de clases personal",
         "modulos.estudiante.carga": "Asignaturas y creditos del periodo",
         "modulos.estudiante.perfil": "Datos personales, calificaciones y asistencia",
+        "modulos.estudiante.reportes": "Descarga de reportes academicos personales",
         "layout.ir_a": "Ir a {nombre}",
         "dashboard.periodo_activo": "Periodo activo",
         "dashboard.estado_periodo": "Estado periodo",
@@ -253,6 +255,7 @@ TRADUCCIONES = {
         "modulos.estudiante.horario": "Personal class schedule",
         "modulos.estudiante.carga": "Subjects and credits for the term",
         "modulos.estudiante.perfil": "Personal data, grades and attendance",
+        "modulos.estudiante.reportes": "Download personal academic reports",
         "layout.ir_a": "Go to {nombre}",
         "dashboard.periodo_activo": "Active term",
         "dashboard.estado_periodo": "Term status",

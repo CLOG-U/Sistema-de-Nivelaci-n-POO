@@ -40,6 +40,7 @@ from interfaz.vistas.mis_cursos import mostrar_mis_cursos
 from interfaz.vistas.mis_horarios import mostrar_mis_horarios
 from interfaz.vistas.reportes import mostrar_reportes
 from interfaz.vistas.reportes_docente import mostrar_reportes_docente
+from interfaz.vistas.reportes_estudiante import mostrar_reportes_estudiante
 from interfaz.vistas.usuarios import mostrar_usuarios
 
 # Diccionario que mapea nombres de rutas a funciones de vistas
@@ -63,6 +64,7 @@ RUTAS = {
     "Mi Horario": mostrar_mis_horarios,
     "Mi Carga": mostrar_mi_carga,
     "Mi Perfil": mostrar_mi_perfil,
+    "Mis Reportes": mostrar_reportes_estudiante,
 }
 
 

@@ -2,46 +2,21 @@ import streamlit as st
 
 from interfaz.auth import obtener_usuario_actual
 from interfaz.branding import encabezado_pagina
+from interfaz.components.layout import intro_modulo
+from interfaz.components.reportes_ui import panel_generar_reporte
 
 
 def mostrar_reportes_docente(sistema):
-    encabezado_pagina("Reportes del docente")
+    encabezado_pagina("Reportes del docente", periodo=sistema.periodo_actual)
 
     docente = obtener_usuario_actual(sistema)
-
     if not docente:
         st.warning("No hay docente seleccionado.")
         return
 
-    cursos = [curso for curso in sistema.cursos.values() if curso.docente == docente]
-
-    st.caption(
-        "Vista de reportes academicos del docente. No permite gestion administrativa."
+    intro_modulo(
+        "Exporte reportes de sus cursos, calificaciones, asistencia y estudiantes inscritos. "
+        "Solo se incluye informacion de los cursos que tiene asignados.",
+        "📊",
     )
-
-    if not cursos:
-        st.info("No hay informacion academica para generar reportes.")
-        return
-
-    resumen = []
-
-    for curso in cursos:
-        horario_texto = "Sin horario"
-        if curso.horario:
-            horario_texto = (
-                f"{curso.horario.dia} "
-                f"{curso.horario.hora_inicio}-{curso.horario.hora_fin}"
-            )
-
-        resumen.append(
-            {
-                "Curso": curso.nombre,
-                "Codigo": curso.codigo,
-                "Paralelo": curso.paralelo,
-                "Cupo": f"{curso.cupo_actual}/{curso.cupo_maximo}",
-                "Estudiantes inscritos": len(curso.lista_estudiantes),
-                "Horario": horario_texto,
-            }
-        )
-
-    st.dataframe(resumen, use_container_width=True, hide_index=True)
+    panel_generar_reporte(sistema, "Docente", usuario=docente, prefijo="docente")

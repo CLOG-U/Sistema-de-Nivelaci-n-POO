@@ -36,6 +36,7 @@ def obtener_opciones_por_rol(rol):
             "Mi Horario",
             "Mi Carga",
             "Mi Perfil",
+            "Mis Reportes",
             "Acerca del Sistema",
         ]
 
@@ -92,6 +93,7 @@ MODULOS_ESTUDIANTE = [
     ("Mi Horario", "modulos.estudiante.horario"),
     ("Mi Carga", "modulos.estudiante.carga"),
     ("Mi Perfil", "modulos.estudiante.perfil"),
+    ("Mis Reportes", "modulos.estudiante.reportes"),
 ]
 
 
