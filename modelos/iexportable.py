@@ -1,20 +1,29 @@
 from abc import ABC, abstractmethod
-#creamos la interfaz IExportable para exportar datos en diferentes formatos
+
+from servicios.exportador_reportes import ArchivoExportado, exportar_reporte
+
+
 class IExportable(ABC):
-    #metodo con el que se exportaran los datos, cada clase que implemente esta interfaz debe definir este metodo
     @abstractmethod
-    def exportar(self, datos):
+    def exportar(self, datos) -> ArchivoExportado:
         pass
 
-#clase ExportarExcel que exporta datos a formato Excel
+
 class ExportarExcel(IExportable):
+    def __init__(self):
+        self.ultimo_archivo = None
 
-    def exportar(self, datos):
-        print("Exportando a Excel:", datos)
+    def exportar(self, datos) -> ArchivoExportado:
+        archivo = exportar_reporte(datos, "Excel")
+        self.ultimo_archivo = archivo
+        return archivo
 
-#clase ExportarPDF que exporta datos a formato PDF
+
 class ExportarPDF(IExportable):
-    
-    def exportar(self, datos):
-        print("Exportando a PDF:", datos)
+    def __init__(self):
+        self.ultimo_archivo = None
 
+    def exportar(self, datos) -> ArchivoExportado:
+        archivo = exportar_reporte(datos, "PDF")
+        self.ultimo_archivo = archivo
+        return archivo

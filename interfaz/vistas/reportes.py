@@ -3,6 +3,18 @@ import streamlit as st
 from interfaz.branding import encabezado_pagina
 from interfaz.components.layout import detalle_entidad, fila_metricas, intro_modulo, tabla_o_vacio
 from interfaz.components.tables import asistencia_registro_to_dict, calificacion_registro_to_dict, reporte_to_dict
+from servicios.exportador_reportes import construir_datos_exportacion, exportar_reporte, obtener_filas_reporte
+
+
+def _mostrar_descarga(archivo, etiqueta="Descargar archivo"):
+    st.download_button(
+        label=etiqueta,
+        data=archivo.contenido,
+        file_name=archivo.nombre,
+        mime=archivo.mime,
+        use_container_width=True,
+        type="primary",
+    )
 
 
 def _formulario_reporte(sistema):
@@ -23,6 +35,7 @@ def _formulario_reporte(sistema):
             if not descripcion:
                 raise ValueError("Complete todos los campos obligatorios")
 
+            filas = obtener_filas_reporte(sistema, tipo_reporte, periodo)
             resumen_previo = sistema.resumen_datos_reporte(tipo_reporte, periodo)
             st.info(f"Datos reales incluidos: {resumen_previo}")
 
@@ -33,10 +46,17 @@ def _formulario_reporte(sistema):
                 formato,
             )
             reporte.generar_reporte()
-            reporte.exportar()
-            st.success(f"Reporte generado en formato {reporte.formato}")
+            archivo = reporte.exportar(filas)
+
+            st.session_state["ultimo_reporte_archivo"] = archivo
+            st.session_state["ultimo_reporte_id"] = reporte.id_reporte
+            st.success(f"Reporte generado en formato {reporte.formato}. Use el boton para descargarlo.")
         except Exception as error:
             st.error(str(error))
+
+    if st.session_state.get("ultimo_reporte_archivo"):
+        st.markdown("#### Descarga del ultimo reporte generado")
+        _mostrar_descarga(st.session_state["ultimo_reporte_archivo"])
 
 
 def _resumen_reportes(sistema):
@@ -98,6 +118,16 @@ def _consulta_reportes(sistema):
                 ("Descripcion", reporte.descripcion),
             ],
         )
+        try:
+            filas_reporte = obtener_filas_reporte(sistema, reporte.tipo_reporte, reporte.periodo)
+            datos = construir_datos_exportacion(reporte, filas_reporte)
+            archivo = exportar_reporte(datos, reporte.formato)
+            _mostrar_descarga(
+                archivo,
+                etiqueta=f"Descargar {reporte.formato} · Reporte {reporte.id_reporte}",
+            )
+        except Exception as error:
+            st.error(f"No se pudo preparar la descarga: {error}")
 
     st.markdown("#### Datos academicos usados en reportes")
     col1, col2 = st.columns(2)

@@ -51,6 +51,12 @@ class Reporte:
         print("Periodo: " + self.__periodo)
         print("Fecha de generacion: " + self.__fecha_generacion)
 #delegamos la exportacion al objeto estrategia (IExportable) recibido por inyeccion de dependencias
-    def exportar(self):
-        datos = {"tipo": self.__tipo_reporte, "periodo": self.__periodo}
-        self.__exportador.exportar(datos)
+    def exportar(self, filas=None):
+        datos = {
+            "tipo": self.__tipo_reporte,
+            "periodo": self.__periodo,
+            "descripcion": self.__descripcion,
+            "fecha": self.__fecha_generacion,
+            "filas": filas or [],
+        }
+        return self.__exportador.exportar(datos)
