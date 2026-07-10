@@ -29,12 +29,12 @@ IF OBJECT_ID('Usuario', 'U') IS NOT NULL DROP TABLE Usuario;
 IF OBJECT_ID('PeriodoAcademico', 'U') IS NOT NULL DROP TABLE PeriodoAcademico;
 IF OBJECT_ID('Facultad', 'U') IS NOT NULL DROP TABLE Facultad;
 GO
-
+-- Almacena las facultades de la universidad.
 CREATE TABLE Facultad(
     id_facultad INT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL
 );
-
+-- Guarda los periodos académicos disponibles.
 CREATE TABLE PeriodoAcademico(
     id_periodo INT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -42,7 +42,8 @@ CREATE TABLE PeriodoAcademico(
     fecha_fin DATE NOT NULL,
     estado VARCHAR(20) NOT NULL
 );
-
+-- Tabla principal donde se almacena la información básica
+-- de todos los usuarios del sistema.
 CREATE TABLE Usuario(
     id_usuario INT PRIMARY KEY,
     cedula VARCHAR(20) UNIQUE NOT NULL,
@@ -53,21 +54,21 @@ CREATE TABLE Usuario(
     telefono VARCHAR(20),
     estado BIT NOT NULL DEFAULT 1
 );
-
+-- Contiene los usuarios con rol de administrador.
 CREATE TABLE Administrador(
     id_usuario INT PRIMARY KEY,
     id_administrador INT UNIQUE NOT NULL,
     cargo VARCHAR(100) NOT NULL,
     FOREIGN KEY(id_usuario) REFERENCES Usuario(id_usuario)
 );
-
+-- Guarda la información adicional de los docentes.
 CREATE TABLE Docente(
     id_usuario INT PRIMARY KEY,
     titulo_profesional VARCHAR(120),
     especialidad VARCHAR(120),
     FOREIGN KEY(id_usuario) REFERENCES Usuario(id_usuario)
 );
-
+-- Guarda la información adicional de los estudiantes.
 CREATE TABLE Estudiante(
     id_usuario INT PRIMARY KEY,
     tipo_documento VARCHAR(30),
@@ -76,7 +77,7 @@ CREATE TABLE Estudiante(
     estado_nivelacion VARCHAR(50) DEFAULT 'Pendiente',
     FOREIGN KEY(id_usuario) REFERENCES Usuario(id_usuario)
 );
-
+-- Registra las carreras universitarias.
 CREATE TABLE Carrera(
     id_carrera INT PRIMARY KEY,
     codigo VARCHAR(20),
