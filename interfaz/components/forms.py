@@ -2,6 +2,7 @@ import streamlit as st
 
 
 def campos_usuario_base(prefijo):
+    # Crea campos de entrada para datos básicos del usuario con prefijo único
     cedula = st.text_input("Cedula", key=f"{prefijo}_cedula")
     nombres = st.text_input("Nombres", key=f"{prefijo}_nombres")
     apellidos = st.text_input("Apellidos", key=f"{prefijo}_apellidos")
