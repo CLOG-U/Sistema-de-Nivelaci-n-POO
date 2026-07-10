@@ -1,13 +1,13 @@
 import sys
 from pathlib import Path
-
+# Agrega la carpeta raíz al PATH
 RAIZ = Path(__file__).resolve().parents[1]
 if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 import streamlit as st
-
-from interfaz.auth import (
+# Importa funciones de autenticación
+from interfaz.auth import ( 
     cerrar_sesion,
     esta_autenticado,
     inicializar_sesion,
@@ -15,14 +15,14 @@ from interfaz.auth import (
     obtener_usuario_actual,
     pantalla_login,
 )
-from interfaz.branding import TITULO_APP, encabezado_sidebar, mostrar_logo_sidebar, RUTA_LOGO
+from interfaz.branding import TITULO_APP, encabezado_sidebar, mostrar_logo_sidebar, RUTA_LOGO   # Importa elementos de la interfaz
 from interfaz.idioma import obtener_gestor_idioma, selector_idioma, t
 from interfaz.navigation import (
     dashboard_inicial_por_rol,
     es_opcion_permitida,
     obtener_etiquetas_menu,
     obtener_opciones_por_rol,
-)
+) # Importa las diferentes vistas
 from interfaz.vistas.acerca import mostrar_acerca
 from interfaz.vistas.aulas import mostrar_aulas
 from interfaz.vistas.cargas import mostrar_cargas
@@ -99,7 +99,7 @@ def _render_sidebar_sesion(sistema, rol, usuario):
     if st.sidebar.button(t("sidebar.cerrar"), use_container_width=True):
         cerrar_sesion()
 
-
+# Configura e inicia la aplicación
 def main():
     # Función principal que configura la aplicación y renderiza vistas según autenticación y rol
     page_icon = str(RUTA_LOGO) if RUTA_LOGO.exists() else "🎓"
@@ -123,11 +123,11 @@ def main():
         pie_pagina()
         return
 
-    rol = obtener_rol_actual()
+    rol = obtener_rol_actual() # Obtiene los datos del usuario
     usuario = obtener_usuario_actual(sistema)
     gestor = obtener_gestor_idioma()
 
-    with st.sidebar:
+    with st.sidebar: # Construye el menú lateral
         _render_sidebar_sesion(sistema, rol, usuario)
         st.markdown("---")
         st.caption(t("sidebar.menu"))
@@ -135,7 +135,7 @@ def main():
         opciones_internas = obtener_opciones_por_rol(rol)
         etiquetas = obtener_etiquetas_menu(rol)
 
-        if st.session_state.nav_seleccion not in opciones_internas:
+        if st.session_state.nav_seleccion not in opciones_internas:   # Selecciona la vista inicial
             st.session_state.nav_seleccion = dashboard_inicial_por_rol(rol)
 
         indice = opciones_internas.index(st.session_state.nav_seleccion)
@@ -149,7 +149,7 @@ def main():
 
     opcion = st.session_state.nav_seleccion
 
-    if not es_opcion_permitida(rol, opcion):
+    if not es_opcion_permitida(rol, opcion):   # Abre la vista correspondiente
         st.error(t("app.sin_permisos"))
     elif opcion in RUTAS:
         RUTAS[opcion](sistema)
@@ -158,5 +158,5 @@ def main():
 
     pie_pagina()
 
-
+# Ejecuta la aplicación
 main()
