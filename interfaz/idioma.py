@@ -185,25 +185,27 @@ def selector_idioma(ubicacion: str = "main"):
     """Botones ES | EN. ubicacion: 'main' (login) o 'sidebar'."""
     gestor = obtener_gestor_idioma()
     idioma = gestor.obtener_idioma()
-    contenedor = st.sidebar if ubicacion == "sidebar" else st
 
-    with contenedor:
+    if ubicacion == "sidebar":
+        col_es, col_en = st.sidebar.columns(2)
+    else:
         col_es, col_en = st.columns(2)
-        with col_es:
-            if st.button(
-                "ES",
-                key=f"lang_es_{ubicacion}",
-                use_container_width=True,
-                type="primary" if idioma == "es" else "secondary",
-            ):
-                gestor.cambiar_idioma("es")
-                st.rerun()
-        with col_en:
-            if st.button(
-                "EN",
-                key=f"lang_en_{ubicacion}",
-                use_container_width=True,
-                type="primary" if idioma == "en" else "secondary",
-            ):
-                gestor.cambiar_idioma("en")
-                st.rerun()
+
+    with col_es:
+        if st.button(
+            "ES",
+            key=f"lang_es_{ubicacion}",
+            use_container_width=True,
+            type="primary" if idioma == "es" else "secondary",
+        ):
+            gestor.cambiar_idioma("es")
+            st.rerun()
+    with col_en:
+        if st.button(
+            "EN",
+            key=f"lang_en_{ubicacion}",
+            use_container_width=True,
+            type="primary" if idioma == "en" else "secondary",
+        ):
+            gestor.cambiar_idioma("en")
+            st.rerun()
