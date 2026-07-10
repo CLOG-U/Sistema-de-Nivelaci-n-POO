@@ -179,6 +179,116 @@ def aplicar_estilos():
     )
 
 
+def aplicar_estilos_login():
+    st.markdown(
+        f"""
+        <style>
+            section[data-testid="stSidebar"] {{
+                display: none !important;
+            }}
+            .main .block-container {{
+                max-width: 100% !important;
+                padding-top: 0 !important;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }}
+            [data-testid="stAppViewContainer"] {{
+                background-color: #ececec !important;
+            }}
+            .main {{
+                background-color: #ececec !important;
+            }}
+            .uleam-topbar {{
+                background: linear-gradient(90deg, {COLOR_NEGRO} 0%, {COLOR_NEGRO_SUAVE} 100%);
+                border-bottom: 3px solid {COLOR_ROJO};
+                padding: 10px 24px;
+                margin: -1rem -1rem 2rem -1rem;
+            }}
+            .uleam-topbar-inner {{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                max-width: 1100px;
+                margin: 0 auto;
+            }}
+            .uleam-topbar-logo-img {{
+                height: 42px;
+                background: {COLOR_BLANCO};
+                padding: 4px 8px;
+                border-radius: 4px;
+            }}
+            .uleam-topbar-siglas {{
+                color: {COLOR_VERDE};
+                font-size: 1.4rem;
+                font-weight: 700;
+            }}
+            .uleam-topbar-actions {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }}
+            .uleam-lang {{
+                color: {COLOR_BLANCO};
+                font-size: 0.85rem;
+                font-weight: 600;
+            }}
+            .uleam-lang-muted {{
+                opacity: 0.55;
+            }}
+            .uleam-lang-sep {{
+                color: #888;
+            }}
+            .login-card {{
+                background: {COLOR_BLANCO};
+                border: 1px solid #d9d9d9;
+                border-radius: 10px;
+                padding: 28px 32px 20px 32px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+                margin-top: 1rem;
+            }}
+            .login-card-header {{
+                text-align: center;
+                margin-bottom: 8px;
+            }}
+            .login-title {{
+                color: {COLOR_NEGRO};
+                font-size: 1.15rem;
+                font-weight: 700;
+                margin: 8px 0 4px 0;
+                border: none;
+                padding: 0;
+            }}
+            .login-subtitle {{
+                color: {COLOR_GRIS_OSCURO};
+                font-size: 0.82rem;
+                margin: 0 0 16px 0;
+            }}
+            [data-testid="stForm"] {{
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }}
+            [data-testid="stForm"] label {{
+                color: {COLOR_GRIS_OSCURO} !important;
+                font-weight: 600 !important;
+            }}
+            [data-testid="stFormSubmitButton"] button {{
+                background-color: {COLOR_ROJO} !important;
+                color: {COLOR_BLANCO} !important;
+                border: none !important;
+                font-weight: 600 !important;
+                padding: 0.55rem 1rem !important;
+            }}
+            [data-testid="stFormSubmitButton"] button:hover {{
+                background-color: {COLOR_NEGRO} !important;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def pie_pagina():
     st.markdown(
         f'<hr style="border:none;border-top:2px solid {COLOR_VERDE};margin-top:24px;">',
