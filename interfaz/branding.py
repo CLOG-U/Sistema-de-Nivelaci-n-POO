@@ -13,8 +13,9 @@ PERIODO_ACTUAL = "2026-1"
 TITULO_APP = f"{SIGLAS} | {NOMBRE_SISTEMA}"
 
 _ASSETS = Path(__file__).resolve().parent / "assets"
-RUTA_LOGO = _ASSETS / "uleam_logo.svg"
-RUTA_ESCUDO = _ASSETS / "uleam_escudo.svg"
+RUTA_LOGO = _ASSETS / "Eloy-Alfarohorizontal.jpg"
+RUTA_LOGO_VERTICAL = _ASSETS / "LOGO-ULEAM-VERTICAL.png"
+RUTA_ESCUDO = RUTA_LOGO_VERTICAL
 
 # Paleta: rojo, blanco, verde y tonos negros
 COLOR_ROJO = "#CE1126"
@@ -25,17 +26,18 @@ COLOR_NEGRO_SUAVE = "#2D2D2D"
 COLOR_GRIS_OSCURO = "#404040"
 
 
-def mostrar_logo(ancho=180):
+def mostrar_logo(ancho=220):
     if RUTA_LOGO.exists():
         st.image(str(RUTA_LOGO), width=ancho)
 
 
 def mostrar_logo_login():
-    if RUTA_ESCUDO.exists():
+    if RUTA_LOGO_VERTICAL.exists():
         _, col, _ = st.columns([1, 1, 1])
         with col:
-            st.image(str(RUTA_ESCUDO), width=100)
-    mostrar_logo(ancho=260)
+            st.image(str(RUTA_LOGO_VERTICAL), width=140)
+    elif RUTA_LOGO.exists():
+        mostrar_logo(ancho=280)
 
 
 def mostrar_logo_sidebar():
