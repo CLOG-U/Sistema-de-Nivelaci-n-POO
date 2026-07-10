@@ -9,7 +9,7 @@ class Aula:
         self.__edificio = edificio
         self.__estado = estado 
 
-#uso de propiedades para acceder a los atributos privados
+    # Getters: permiten acceso de lectura a los atributos privados
     @property
     def id_aula(self):
         return self.__id_aula
@@ -38,13 +38,14 @@ class Aula:
     def estado(self):
         return self.__estado
 
+    # Registra un aula en el sistema
     def registrar_aula(self):
         print("Aula registrada: " + self.__nombre + " edificio " + self.__edificio + " piso " + str(self.__piso))
 
-#modifica informacion del aula 
+    # Actualiza un campo específico del aula
     def modificar_aula(self, campo, valor):
         print("Aula modificada: " + campo + " cambiado a " + str(valor))
 
-#muestra la informacion del aula
+    # Imprime los datos principales del aula
     def mostrar_info(self):
         print("Aula: " + self.__nombre + " capacidad: " + str(self.__capacidad))
