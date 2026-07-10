@@ -5,7 +5,7 @@ from interfaz.branding import encabezado_pagina
 from interfaz.components.cards import metric_card
 from interfaz.components.layout import fila_metricas, intro_modulo, tabla_o_vacio, tarjetas_navegacion
 from interfaz.components.tables import calificacion_registro_to_dict, curso_to_dict
-from interfaz.navigation import MODULOS_DOCENTE
+from interfaz.navigation import modulos_docente_traducidos
 
 
 def _cursos_docente(sistema, docente):
@@ -88,7 +88,7 @@ def mostrar_dashboard_docente(sistema):
 
         st.divider()
         st.subheader("Accesos rapidos")
-        tarjetas_navegacion(MODULOS_DOCENTE, prefijo_clave="docente")
+        tarjetas_navegacion(modulos_docente_traducidos(), prefijo_clave="docente")
 
     with tab_consulta:
         _consulta_docente(sistema, docente)

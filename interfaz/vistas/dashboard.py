@@ -4,7 +4,7 @@ from interfaz.auth import obtener_rol_actual, obtener_usuario_actual
 from interfaz.branding import NOMBRE_SISTEMA, encabezado_pagina
 from interfaz.components.layout import fila_metricas, intro_modulo, tabla_o_vacio, tarjetas_navegacion
 from interfaz.components.tables import curso_to_dict
-from interfaz.navigation import MODULOS_ADMIN
+from interfaz.navigation import modulos_admin_traducidos
 
 
 def mostrar_dashboard(sistema):
@@ -63,7 +63,7 @@ def mostrar_dashboard(sistema):
 
     st.divider()
     st.subheader("Modulos del sistema")
-    tarjetas_navegacion(MODULOS_ADMIN, prefijo_clave="admin")
+    tarjetas_navegacion(modulos_admin_traducidos(), prefijo_clave="admin")
 
     st.divider()
     st.subheader("Cursos activos del periodo")

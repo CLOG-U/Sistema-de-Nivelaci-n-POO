@@ -30,17 +30,25 @@ def detalle_entidad(titulo, campos):
 
 
 def tarjetas_navegacion(modulos, prefijo_clave="modulo", columnas=2):
+    from interfaz.idioma import t
     from interfaz.navigation import navegar_a
 
     cols = st.columns(columnas)
-    for indice, (nombre, descripcion) in enumerate(modulos):
+    for indice, item in enumerate(modulos):
+        if len(item) == 3:
+            clave_interna, nombre, descripcion = item
+        else:
+            clave_interna = item[0]
+            nombre = item[0]
+            descripcion = item[1] if len(item) > 1 else ""
+
         with cols[indice % columnas]:
             with st.container(border=True):
                 st.markdown(f"**{nombre}**")
                 st.caption(descripcion)
                 if st.button(
-                    f"Ir a {nombre}",
-                    key=f"{prefijo_clave}_{indice}_{nombre.replace(' ', '_')}",
+                    t("layout.ir_a", nombre=nombre),
+                    key=f"{prefijo_clave}_{indice}_{clave_interna.replace(' ', '_')}",
                     use_container_width=True,
                 ):
-                    navegar_a(nombre)
+                    navegar_a(clave_interna)

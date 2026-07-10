@@ -10,7 +10,7 @@ from interfaz.components.tables import (
     carga_to_dict,
     curso_to_dict,
 )
-from interfaz.navigation import MODULOS_ESTUDIANTE
+from interfaz.navigation import modulos_estudiante_traducidos
 
 
 def _cursos_estudiante(sistema, estudiante):
@@ -62,7 +62,7 @@ def _resumen_estudiante(sistema, estudiante):
 
     st.divider()
     st.subheader("Accesos rapidos")
-    tarjetas_navegacion(MODULOS_ESTUDIANTE, prefijo_clave="estudiante")
+    tarjetas_navegacion(modulos_estudiante_traducidos(), prefijo_clave="estudiante")
 
 
 def _consulta_estudiante(sistema, estudiante):

@@ -16,9 +16,11 @@ from interfaz.auth import (
     pantalla_login,
 )
 from interfaz.branding import TITULO_APP, encabezado_sidebar, mostrar_logo_sidebar, RUTA_LOGO
+from interfaz.idioma import obtener_gestor_idioma, selector_idioma, t
 from interfaz.navigation import (
     dashboard_inicial_por_rol,
     es_opcion_permitida,
+    obtener_etiquetas_menu,
     obtener_opciones_por_rol,
 )
 from interfaz.vistas.acerca import mostrar_acerca
@@ -62,10 +64,15 @@ RUTAS = {
 
 
 def _render_sidebar_sesion(sistema, rol, usuario):
+    gestor = obtener_gestor_idioma()
+
     mostrar_logo_sidebar()
     st.sidebar.markdown(encabezado_sidebar(), unsafe_allow_html=True)
     st.sidebar.markdown("---")
-    st.sidebar.caption("Sesion activa")
+    st.sidebar.caption(t("sidebar.idioma"))
+    selector_idioma(ubicacion="sidebar")
+    st.sidebar.markdown("---")
+    st.sidebar.caption(t("sidebar.sesion"))
 
     nombre = st.session_state.get("usuario_actual")
     if not nombre and usuario:
@@ -75,15 +82,15 @@ def _render_sidebar_sesion(sistema, rol, usuario):
         st.sidebar.markdown(f"**{nombre}**")
 
     st.sidebar.markdown(
-        f'<span class="role-badge">Rol: {rol}</span>',
+        f'<span class="role-badge">{t("sidebar.rol")}: {gestor.traducir_rol(rol)}</span>',
         unsafe_allow_html=True,
     )
-    st.sidebar.caption(f"Periodo: {sistema.periodo_actual or '—'}")
+    st.sidebar.caption(f"{t('sidebar.periodo')}: {sistema.periodo_actual or '—'}")
 
     if not st.session_state.get("db_cargada"):
-        st.sidebar.warning("Modo demo en memoria.")
+        st.sidebar.warning(t("sidebar.demo"))
 
-    if st.sidebar.button("Cerrar sesion", use_container_width=True):
+    if st.sidebar.button(t("sidebar.cerrar"), use_container_width=True):
         cerrar_sesion()
 
 
@@ -111,30 +118,36 @@ def main():
 
     rol = obtener_rol_actual()
     usuario = obtener_usuario_actual(sistema)
+    gestor = obtener_gestor_idioma()
 
     with st.sidebar:
         _render_sidebar_sesion(sistema, rol, usuario)
         st.markdown("---")
-        st.caption("Menu de navegacion")
+        st.caption(t("sidebar.menu"))
 
-        opciones = obtener_opciones_por_rol(rol)
-        if st.session_state.nav_seleccion not in opciones:
+        opciones_internas = obtener_opciones_por_rol(rol)
+        etiquetas = obtener_etiquetas_menu(rol)
+
+        if st.session_state.nav_seleccion not in opciones_internas:
             st.session_state.nav_seleccion = dashboard_inicial_por_rol(rol)
 
-        opcion = st.radio(
+        indice = opciones_internas.index(st.session_state.nav_seleccion)
+        etiqueta_sel = st.radio(
             "Navegacion",
-            opciones,
-            index=opciones.index(st.session_state.nav_seleccion),
+            etiquetas,
+            index=indice,
             label_visibility="collapsed",
         )
-        st.session_state.nav_seleccion = opcion
+        st.session_state.nav_seleccion = gestor.clave_menu(etiqueta_sel)
+
+    opcion = st.session_state.nav_seleccion
 
     if not es_opcion_permitida(rol, opcion):
-        st.error("No tiene permisos para acceder a esta seccion.")
+        st.error(t("app.sin_permisos"))
     elif opcion in RUTAS:
         RUTAS[opcion](sistema)
     else:
-        st.error("No tiene permisos para acceder a esta seccion.")
+        st.error(t("app.sin_permisos"))
 
     pie_pagina()
 

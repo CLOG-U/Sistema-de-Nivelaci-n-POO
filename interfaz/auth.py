@@ -2,21 +2,15 @@ import base64
 
 import streamlit as st
 
-from interfaz.branding import (
-    COLOR_BLANCO,
-    COLOR_ROJO,
-    NOMBRE_SISTEMA,
-    RUTA_LOGO,
-    RUTA_LOGO_VERTICAL,
-    SIGLAS,
-    UNIVERSIDAD,
-)
+from interfaz.branding import RUTA_LOGO, RUTA_LOGO_VERTICAL, SIGLAS
+from interfaz.idioma import obtener_gestor_idioma, selector_idioma, t
 from modelos.admin import Administrador
 from modelos.docente import Docente
 from modelos.estudiante import Estudiante
 
 
 def inicializar_sesion():
+    obtener_gestor_idioma().obtener_idioma()
     if "autenticado" not in st.session_state:
         st.session_state.autenticado = False
     if "rol_actual" not in st.session_state:
@@ -78,14 +72,14 @@ def _dashboard_por_rol(rol):
 def autenticar_usuario(sistema, identificador, contrasena):
     usuario = sistema.buscar_usuario_por_identificador(identificador)
     if not usuario:
-        return False, "Usuario no encontrado. Verifique su usuario institucional."
+        return False, t("login.error_usuario")
 
     if not usuario.iniciar_sesion(contrasena):
-        return False, "Contrasena incorrecta o usuario inactivo."
+        return False, t("login.error_contrasena")
 
     rol = _rol_desde_usuario(usuario)
     if not rol:
-        return False, "Tipo de usuario no reconocido en el sistema."
+        return False, t("login.error_rol")
 
     nombre_completo = f"{usuario.nombres} {usuario.apellidos}"
     st.session_state.autenticado = True
@@ -93,7 +87,7 @@ def autenticar_usuario(sistema, identificador, contrasena):
     st.session_state.usuario_actual_id = usuario.id_usuario
     st.session_state.usuario_actual = nombre_completo
     st.session_state.nav_seleccion = _dashboard_por_rol(rol)
-    return True, f"Bienvenido, {nombre_completo}"
+    return True, t("login.bienvenida", nombre=nombre_completo)
 
 
 def _logo_base64(ruta):
@@ -104,39 +98,31 @@ def _logo_base64(ruta):
     return f"data:{mime};base64,{contenido}"
 
 
-def barra_superior_login():
-    logo_src = _logo_base64(RUTA_LOGO)
-    logo_html = (
-        f'<img src="{logo_src}" alt="{SIGLAS}" class="uleam-topbar-logo-img" />'
-        if logo_src
-        else f'<span class="uleam-topbar-siglas">{SIGLAS}</span>'
-    )
-    return f"""
-    <div class="uleam-topbar">
-        <div class="uleam-topbar-inner">
-            <div class="uleam-topbar-brand">{logo_html}</div>
-            <div class="uleam-topbar-actions">
-                <span class="uleam-lang">ES</span>
-                <span class="uleam-lang-sep">|</span>
-                <span class="uleam-lang uleam-lang-muted">EN</span>
-            </div>
-        </div>
-    </div>
-    """
+def render_barra_superior():
+    st.markdown('<div class="uleam-topbar-wrap">', unsafe_allow_html=True)
+    col_logo, col_lang = st.columns([5, 1])
+
+    with col_logo:
+        if RUTA_LOGO.exists():
+            st.image(str(RUTA_LOGO), width=200)
+
+    with col_lang:
+        st.markdown('<div class="uleam-lang-wrap">', unsafe_allow_html=True)
+        selector_idioma(ubicacion="main")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def pantalla_login(sistema):
     from interfaz.styles import aplicar_estilos_login
 
     aplicar_estilos_login()
-    st.markdown(barra_superior_login(), unsafe_allow_html=True)
+    render_barra_superior()
 
     if not st.session_state.get("db_cargada"):
         st.warning(
-            st.session_state.get(
-                "db_mensaje",
-                "Modo demostracion en memoria. Configure SQL Server para persistencia real.",
-            )
+            st.session_state.get("db_mensaje", t("app.demo_sql"))
         )
 
     _, col_centro, _ = st.columns([1, 1.1, 1])
@@ -152,8 +138,8 @@ def pantalla_login(sistema):
         st.markdown(
             f"""
             <div class="login-card-header">
-                <h2 class="login-title">{NOMBRE_SISTEMA}</h2>
-                <p class="login-subtitle">{SIGLAS} · {UNIVERSIDAD}</p>
+                <h2 class="login-title">{t("app.titulo_sistema")}</h2>
+                <p class="login-subtitle">{SIGLAS} · {t("app.universidad")}</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -161,15 +147,23 @@ def pantalla_login(sistema):
 
         with st.form("form_login_institucional", clear_on_submit=False):
             usuario = st.text_input(
-                "Usuario",
-                placeholder="Cedula o correo @uleam.edu.ec",
+                t("login.usuario"),
+                placeholder=t("login.placeholder_usuario"),
             )
-            contrasena = st.text_input("Contrasena", type="password", placeholder="Ingrese su contrasena")
-            enviar = st.form_submit_button("Acceder", use_container_width=True, type="primary")
+            contrasena = st.text_input(
+                t("login.contrasena"),
+                type="password",
+                placeholder=t("login.placeholder_contrasena"),
+            )
+            enviar = st.form_submit_button(
+                t("login.acceder"),
+                use_container_width=True,
+                type="primary",
+            )
 
             if enviar:
                 if not usuario.strip() or not contrasena:
-                    st.error("Complete usuario y contrasena.")
+                    st.error(t("login.error_campos"))
                 else:
                     ok, mensaje = autenticar_usuario(sistema, usuario, contrasena)
                     if ok:
@@ -179,14 +173,15 @@ def pantalla_login(sistema):
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        with st.expander("Credenciales de demostracion"):
+        with st.expander(t("login.credenciales_titulo")):
+            gestor = obtener_gestor_idioma()
             st.markdown(
-                """
-                | Rol | Usuario (cedula) | Contrasena |
+                f"""
+                | {t("login.tabla_rol")} | {t("login.tabla_usuario")} | {t("login.tabla_contrasena")} |
                 |-----|------------------|------------|
-                | Administrador | 1300004444 | adm123 |
-                | Docente | 1300001111 | doc123 |
-                | Estudiante | 1300002222 | est123 |
+                | {gestor.traducir_rol("Administrador")} | 1300004444 | adm123 |
+                | {gestor.traducir_rol("Docente")} | 1300001111 | doc123 |
+                | {gestor.traducir_rol("Estudiante")} | 1300002222 | est123 |
                 """
             )
 

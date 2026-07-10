@@ -198,6 +198,19 @@ def aplicar_estilos_login():
             .main {{
                 background-color: #ececec !important;
             }}
+            .uleam-topbar-wrap {{
+                background: linear-gradient(90deg, {COLOR_NEGRO} 0%, {COLOR_NEGRO_SUAVE} 100%);
+                border-bottom: 3px solid {COLOR_ROJO};
+                padding: 8px 16px;
+                margin: -1rem -1rem 1.5rem -1rem;
+                border-radius: 0;
+            }}
+            .uleam-lang-wrap {{
+                padding-top: 4px;
+            }}
+            .uleam-lang-wrap [data-testid="column"] {{
+                padding: 0 2px !important;
+            }}
             .uleam-topbar {{
                 background: linear-gradient(90deg, {COLOR_NEGRO} 0%, {COLOR_NEGRO_SUAVE} 100%);
                 border-bottom: 3px solid {COLOR_ROJO};
