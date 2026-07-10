@@ -1,6 +1,6 @@
 import streamlit as st
 
-from servicios.exportador_reportes import (
+from servicios.exportador_reportes import (  # Importa funciones para generar y exportar reportes
     exportar_reporte,
     obtener_filas_reporte_por_rol,
     preparar_exportacion_directa,
@@ -8,28 +8,28 @@ from servicios.exportador_reportes import (
     tipos_reporte_por_rol,
 )
 
-
+# Crea una clave única para guardar datos en la sesión
 def _clave_sesion(prefijo: str, nombre: str) -> str:
     return f"reporte_{prefijo}_{nombre}"
 
-
+# Devuelve los cursos asignados al docente
 def _cursos_docente(sistema, docente):
     return [curso for curso in sistema.cursos.values() if curso.docente == docente]
 
-
+# Obtiene el nombre completo del usuario
 def _nombre_usuario(usuario):
     if not usuario:
         return "Sistema"
     return f"{usuario.nombres} {usuario.apellidos}"
 
-
+# Muestra el panel para generar reportes
 def panel_generar_reporte(sistema, rol: str, usuario=None, prefijo: str = "general"):
-    tipos = tipos_reporte_por_rol(rol)
+    tipos = tipos_reporte_por_rol(rol) # Obtiene los tipos de reporte disponibles
     if not tipos:
         st.warning("No hay tipos de reporte disponibles para este rol.")
         return
 
-    periodos = sistema.listar_periodos() or [sistema.periodo_actual or "Sin periodo"]
+    periodos = sistema.listar_periodos() or [sistema.periodo_actual or "Sin periodo"] # Lista los períodos académicos
 
     st.markdown("#### Configurar reporte")
     col_tipo, col_periodo = st.columns(2)
@@ -53,7 +53,7 @@ def panel_generar_reporte(sistema, rol: str, usuario=None, prefijo: str = "gener
         )
         curso_id = opciones_curso[etiqueta_curso]
 
-    col_formato, col_desc = st.columns([1, 2])
+    col_formato, col_desc = st.columns([1, 2]) # Selecciona formato y descripción
     with col_formato:
         formato = st.radio("Formato de descarga", ["PDF", "Excel"], horizontal=True, key=_clave_sesion(prefijo, "formato"))
     with col_desc:
@@ -63,7 +63,7 @@ def panel_generar_reporte(sistema, rol: str, usuario=None, prefijo: str = "gener
             key=_clave_sesion(prefijo, "descripcion"),
         )
 
-    filas = obtener_filas_reporte_por_rol(
+    filas = obtener_filas_reporte_por_rol( # Obtiene los datos del reporte
         sistema,
         rol,
         tipo_reporte,
@@ -71,15 +71,15 @@ def panel_generar_reporte(sistema, rol: str, usuario=None, prefijo: str = "gener
         usuario=usuario,
         curso_id=curso_id,
     )
-    st.caption(resumen_filas_reporte(filas))
+    st.caption(resumen_filas_reporte(filas)) # Muestra la cantidad de registros
 
-    if filas:
+    if filas: # Vista previa de los datos
         with st.expander("Vista previa de datos (primeros 15 registros)", expanded=False):
             st.dataframe(filas[:15], use_container_width=True, hide_index=True)
     else:
         st.warning("No hay datos con los filtros actuales. Ajuste el periodo o el tipo de reporte.")
 
-    generar = st.button(
+    generar = st.button(  # Botón para generar el reporte
         "Generar documento",
         type="primary",
         use_container_width=True,
@@ -111,7 +111,7 @@ def panel_generar_reporte(sistema, rol: str, usuario=None, prefijo: str = "gener
 
     archivo_guardado = st.session_state.get(_clave_sesion(prefijo, "archivo"))
     if archivo_guardado:
-        st.download_button(
+        st.download_button( # Muestra el botón de descarga
             label=f"Descargar {archivo_guardado['formato']} · {archivo_guardado['nombre']}",
             data=archivo_guardado["contenido"],
             file_name=archivo_guardado["nombre"],
