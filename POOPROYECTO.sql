@@ -1,12 +1,16 @@
+-- Verifica si la base de datos PROYECTOPOO no existe.
+-- Si no existe, la crea automáticamente.
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'PROYECTOPOO')
 BEGIN
     CREATE DATABASE PROYECTOPOO;
 END
 GO
-
+-- Selecciona la base de datos para trabajar en ella.
 USE PROYECTOPOO;
 GO
-
+-- Elimina las tablas si ya existen.
+-- Esto permite ejecutar el script varias veces sin generar errores.
+-- Se eliminan respetando el orden de las claves foráneas.
 IF OBJECT_ID('DetalleCalificacion', 'U') IS NOT NULL DROP TABLE DetalleCalificacion;
 IF OBJECT_ID('DetalleAsistencia', 'U') IS NOT NULL DROP TABLE DetalleAsistencia;
 IF OBJECT_ID('Reporte', 'U') IS NOT NULL DROP TABLE Reporte;
