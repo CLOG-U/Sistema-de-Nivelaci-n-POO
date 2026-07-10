@@ -4,6 +4,7 @@ from modelos.estudiante import Estudiante
 
 
 def usuario_to_dict(usuario):
+    # Convierte un objeto usuario a diccionario con información formateada
     if isinstance(usuario, Estudiante):
         tipo = "Estudiante"
     elif isinstance(usuario, Docente):
@@ -26,6 +27,7 @@ def usuario_to_dict(usuario):
 
 
 def aula_to_dict(aula):
+    # Convierte un aula a diccionario con detalles de ubicación y estado
     return {
         "ID": aula.id_aula,
         "Codigo": aula.codigo,
@@ -38,6 +40,7 @@ def aula_to_dict(aula):
 
 
 def horario_to_dict(horario):
+    # Convierte un horario a diccionario con información del aula asociada
     aula = horario.aula
     aula_texto = f"{aula.codigo} - {aula.nombre}" if aula else "Sin aula"
     return {
@@ -52,6 +55,7 @@ def horario_to_dict(horario):
 
 
 def curso_to_dict(curso):
+    # Convierte un curso a diccionario con docente, aula y horario formateados
     docente = curso.docente
     docente_texto = f"{docente.nombres} {docente.apellidos}" if docente else "Sin docente"
     aula = curso.aula
@@ -73,6 +77,7 @@ def curso_to_dict(curso):
 
 
 def carga_to_dict(carga):
+    # Convierte una carga académica a diccionario con información del estudiante
     estudiante = carga.estudiante
     return {
         "ID": carga.id_carga,
@@ -85,6 +90,7 @@ def carga_to_dict(carga):
 
 
 def reporte_to_dict(reporte):
+    # Convierte un reporte a diccionario con tipo, fecha y formato
     return {
         "ID": reporte.id_reporte,
         "Tipo": reporte.tipo_reporte,
@@ -96,6 +102,7 @@ def reporte_to_dict(reporte):
 
 
 def matricula_to_dict(matricula):
+    # Convierte una matrícula a diccionario, maneja casos vacíos
     if not matricula:
         return {
             "ID matricula": "-",
@@ -114,6 +121,7 @@ def matricula_to_dict(matricula):
 
 
 def periodo_to_dict(periodo):
+    # Convierte un período académico a diccionario con fechas
     return {
         "ID": periodo.id_periodo,
         "Nombre": periodo.nombre,
@@ -124,6 +132,7 @@ def periodo_to_dict(periodo):
 
 
 def calificacion_registro_to_dict(registro):
+    # Convierte registro de calificación a diccionario con notas y estado
     calificacion = registro["calificacion"]
     estudiante = registro["estudiante"]
     curso = registro["curso"]
@@ -140,6 +149,7 @@ def calificacion_registro_to_dict(registro):
 
 
 def asistencia_registro_to_dict(registro):
+    # Convierte registro de asistencia a diccionario con fecha y observación
     asistencia = registro["asistencia"]
     estudiante = registro["estudiante"]
     curso = registro["curso"]
@@ -155,6 +165,7 @@ def asistencia_registro_to_dict(registro):
 
 
 def usuario_detalle_campos(usuario):
+    # Genera campos de detalle de usuario según su tipo (estudiante, docente, admin)
     campos = [
         ("ID", usuario.id_usuario),
         ("Cedula", usuario.cedula),
@@ -193,14 +204,15 @@ def usuario_detalle_campos(usuario):
 
 
 def aula_con_uso_dict(aula, cursos_asignados):
+    # Augmenta datos de aula con cantidad de cursos asignados
     datos = aula_to_dict(aula)
     datos["Cursos asignados"] = cursos_asignados
     return datos
 
 
 def curso_detalle_dict(curso):
+    # Augmenta datos de curso con inscritos y cupo disponible
     datos = curso_to_dict(curso)
     datos["Inscritos"] = len(curso.lista_estudiantes)
     datos["Cupo disponible"] = curso.cupo_maximo - curso.cupo_actual
     return datos
-
